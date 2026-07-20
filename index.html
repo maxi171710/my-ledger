@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STUDIO BALANCE — Warm Elegant Ledger</title>
+    <title>STUDIO BALANCE — Cloud Horizon Ledger</title>
     <style>
         :root {
             /* Warm Creamy Gallery Palette */
             --bg-main: #fbf9f4;       /* Soft cream / ivory canvas */
             --bg-card: #f5f0e6;       /* Warm buttery stone tone */
-            --bg-window: #ffffff;     /* Pure white for the interactive window */
+            --bg-window: #ffffff;     /* Pure white */
             --text-main: #24221f;     /* Warm charcoal */
             --text-muted: #8c857b;    /* Subdued warm grey */
             --border-fine: #e6dfd3;   /* Delicate muted amber line */
             --accent-warm: #d97706;   /* Warm amber accent */
-            --accent-warning: #b91c1c;/* Warning color */
+            --accent-warning: #b91c1c;/* Crimson warning */
             
             --font-serif: "Playfair Display", "Didot", "Georgia", serif;
             --font-sans: "-apple-system", "BlinkMacSystemFont", "Helvetica Neue", "Arial", sans-serif;
+            --sidebar-width: 260px;
         }
 
         body {
@@ -25,55 +26,62 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
             display: flex;
-            justify-content: center;
+            min-height: 100vh;
             letter-spacing: -0.01em;
             -webkit-font-smoothing: antialiased;
-            min-height: 100vh;
             box-sizing: border-box;
         }
 
-        .container {
-            width: 100%;
-            max-width: 750px;
-        }
-
-        /* Top Header Navigation */
-        header {
+        /* --- 左側邊欄目錄 Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border-fine);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 40px 24px;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid var(--text-main);
-            padding-bottom: 25px;
-            margin-bottom: 45px;
+            box-sizing: border-box;
+            z-index: 100;
         }
 
         .brand-section h1 {
             font-family: var(--font-serif);
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 400;
             margin: 0;
             line-height: 1.1;
         }
 
         .brand-section p {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             color: var(--text-muted);
             margin: 8px 0 0 0;
         }
 
-        /* User Profile UI Components */
+        /* 用戶登入資訊區塊 */
         .user-profile-box {
+            margin-top: 20px;
+            padding: 12px;
+            border: 1px dashed var(--border-fine);
+            background-color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-top: 15px;
-            padding: 8px 12px;
-            background-color: var(--bg-card);
-            border: 1px dashed var(--border-fine);
+            gap: 8px;
         }
         .user-avatar {
             width: 28px;
@@ -82,79 +90,180 @@
             border: 1px solid var(--border-fine);
         }
         .user-name {
-            font-size: 0.8rem;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+        .auth-btn {
+            background: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            padding: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            width: 100%;
+            text-align: center;
+        }
+        .auth-btn.logout {
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
         }
 
-        .header-actions {
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0 auto 0;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .action-row {
+        .nav-item {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 2px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--text-main);
+            background-color: rgba(36, 34, 31, 0.04);
+            border-left-color: var(--text-main);
+        }
+
+        .sidebar-footer {
             display: flex;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Interactive Controls */
-        .btn-art {
+        .btn-lang {
             background: none;
             border: 1px solid var(--text-main);
             color: var(--text-main);
-            padding: 8px 16px;
-            font-size: 0.75rem;
+            padding: 6px 12px;
+            font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.1em;
             cursor: pointer;
-            transition: all 0.25s ease;
             text-transform: uppercase;
         }
-
-        .btn-art:hover {
+        .btn-lang:hover {
             background-color: var(--text-main);
             color: var(--bg-main);
         }
 
-        .btn-trigger-window {
+        /* --- 右側內容主區塊 --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 50px 5%; 
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .cloud-placeholder {
+            text-align: center;
+            padding: 100px 0;
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        /* 分頁切換 */
+        .tab-page {
+            display: none;
+            width: 100%;
+        }
+        .tab-page.active {
+            display: block;
+        }
+
+        /* 標題樣式 */
+        .page-title {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 400;
+            margin: 0 0 30px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--text-main);
+            width: 100%;
+        }
+
+        /* 主日曆與維度切換區塊 */
+        .main-calendar-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background-color: var(--bg-card);
-            border-color: var(--border-fine);
+            border: 1px solid var(--border-fine);
+            padding: 12px 24px;
+            margin-bottom: 30px;
+            width: 100%;
+            box-sizing: border-box;
         }
-        
-        .btn-auth {
-            background-color: var(--text-main);
-            color: var(--bg-main);
+
+        .calendar-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .btn-auth.logout {
-            background-color: transparent;
+
+        .main-calendar-box label {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
             color: var(--text-main);
         }
 
-        /* Status Banner for Local Mode */
-        .cloud-placeholder {
-            text-align: center;
-            padding: 15px 20px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            border: 1px dashed var(--border-fine);
-            background-color: rgba(245, 240, 230, 0.4);
-            margin-bottom: 30px;
-            letter-spacing: 0.05em;
+        /* 日/月檢視維度按鈕 */
+        .view-toggle-group {
+            display: flex;
+            border: 1px solid var(--text-main);
         }
 
-        /* Modern Creamy Dashboard Grid */
+        .view-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .view-btn.active {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+        }
+
+        /* 數據看板 */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 0;
             border: 1px solid var(--border-fine);
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             background-color: var(--bg-card);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .card {
-            padding: 25px;
+            padding: 30px;
             text-align: left;
             border-right: 1px solid var(--border-fine);
         }
@@ -175,71 +284,167 @@
         .card p {
             margin: 0;
             font-family: var(--font-serif);
-            font-size: 1.6rem;
+            font-size: 2rem;
             font-weight: 400;
         }
 
-        /* Draggable Floating Window System */
-        .interactive-window {
-            position: fixed;
-            top: 15%;
-            left: calc(50% - 230px);
-            background: var(--bg-window);
-            border: 1px solid var(--text-main);
-            padding: 0 30px 30px 30px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 20px 50px rgba(36, 34, 31, 0.15);
-            z-index: 2000;
-            display: none;
+        /* 預算管理區塊 */
+        .budget-section {
+            border: 1px solid var(--border-fine);
+            padding: 30px;
+            margin-bottom: 30px;
+            background-color: #ffffff;
+            width: 100%;
             box-sizing: border-box;
         }
 
-        .interactive-window.active {
-            display: block;
-        }
-
-        .window-header-drag {
+        .budget-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 20px 0 15px 0;
-            border-bottom: 1px solid var(--border-fine);
-            cursor: move;
-            user-select: none;
-            margin-bottom: 25px;
+            align-items: baseline;
+            margin-bottom: 15px;
         }
 
-        .window-header-drag h2 {
+        .budget-header h3 {
+            margin: 0;
             font-family: var(--font-serif);
             font-size: 1.2rem;
-            margin: 0;
             font-weight: 400;
-            pointer-events: none;
         }
 
-        .close-window-btn {
-            background: none;
-            border: none;
-            font-size: 1.4rem;
-            cursor: pointer;
+        .budget-status {
+            font-size: 0.9rem;
             color: var(--text-muted);
-            padding: 0 5px;
-            line-height: 1;
         }
 
-        .close-window-btn:hover {
+        .budget-bar-bg {
+            background-color: var(--bg-main);
+            height: 10px;
+            width: 100%;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .budget-bar-fill {
+            background-color: var(--text-muted); 
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .budget-alert {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 10px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* 圓餅圖區塊 */
+        .chart-section {
+            border: 1px solid var(--border-fine);
+            padding: 40px;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            height: 340px;
+        }
+
+        .no-data-msg {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 50px 0;
+            font-style: italic;
+        }
+
+        /* 雙欄並排架構 */
+        .page-split-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-container-box {
+            background: #ffffff;
+            border: 1px solid var(--border-fine);
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        /* 歷史明細篩選面板 */
+        .filter-panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-fine);
+            padding: 24px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) auto;
+            gap: 15px;
+            align-items: flex-end;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 6px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 8px 0;
+            font-size: 0.85rem;
+            background-color: transparent;
+        }
+
+        .btn-art {
+            background: none;
+            border: 1px solid var(--text-main);
             color: var(--text-main);
+            padding: 10px 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+        .btn-art:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
         }
 
-        /* Editorial Form Elements */
+        .form-divider {
+            border: none;
+            border-top: 1px solid var(--border-fine);
+            margin: 35px 0 25px 0;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -275,7 +480,7 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 10px;
             transition: opacity 0.2s ease;
         }
 
@@ -283,24 +488,16 @@
             opacity: 0.85;
         }
 
-        /* History Index */
-        .history-section-header {
-            font-family: var(--font-serif);
-            font-size: 1.4rem;
-            font-weight: 400;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-fine);
-        }
-
+        /* 歷史明細清單 */
         .transaction-list {
             list-style: none;
             padding: 0;
             margin: 0;
+            width: 100%;
         }
 
         .transaction-item {
-            padding: 18px 0;
+            padding: 20px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -313,15 +510,25 @@
         }
 
         .item-desc {
-            font-size: 1rem;
+            font-size: 1.05rem;
         }
 
         .item-sub {
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: 4px;
+            margin-top: 6px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+
+        .tag-badge {
+            display: inline-block;
+            background-color: var(--bg-card);
+            color: var(--accent-warm);
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            margin-left: 6px;
+            font-weight: 600;
         }
 
         .right-section {
@@ -331,8 +538,8 @@
 
         .item-amount {
             font-family: var(--font-serif);
-            font-size: 1.15rem;
-            margin-right: 20px;
+            font-size: 1.25rem;
+            margin-right: 25px;
         }
 
         .delete-btn {
@@ -340,8 +547,8 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 1.1rem;
-            transition: color 0.2s ease;
+            font-size: 1.2rem;
+            padding: 5px 10px;
         }
         
         .delete-btn:hover {
@@ -358,87 +565,232 @@
         }
         .dot-income { background-color: var(--accent-warm); }
         .dot-expense { background-color: var(--text-muted); }
+
+        /* 週期性排程清單樣式 */
+        .routine-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0 0;
+        }
+        .routine-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border-fine);
+            font-size: 0.85rem;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div class="brand-section">
-            <h1 id="ui-title">Studio Balance</h1>
-            <p id="ui-subtitle">Personal Consumption Ledger</p>
-            <div class="user-profile-box" id="user-info-ui" style="display: none;">
+<div class="sidebar">
+    <div class="brand-section">
+        <h1 id="ui-title">Studio Balance</h1>
+        <p id="ui-subtitle">Cloud Horizon Ledger</p>
+        
+        <div class="user-profile-box" id="auth-box">
+            <div class="user-info" id="user-info-ui" style="display: none;">
                 <img id="user-photo" class="user-avatar" src="" alt="Avatar">
                 <span id="user-display-name" class="user-name">Loading...</span>
             </div>
+            <button id="auth-action-btn" class="auth-btn">Sign In With Google</button>
         </div>
-        <div class="header-actions">
-            <div class="action-row">
-                <button class="btn-art btn-trigger-window" id="ui-btn-open">— 記帳面板 —</button>
-                <button class="btn-art" id="lang-toggle">ZH</button>
-            </div>
-            <div class="action-row" style="margin-top: 8px;">
-                <button class="btn-art btn-auth" id="auth-action-btn">Sign In With Google</button>
-            </div>
-        </div>
-    </header>
+    </div>
+    
+    <ul class="nav-menu">
+        <li class="nav-item active" id="menu-dashboard">儀表板 / Dashboard</li>
+        <li class="nav-item" id="menu-entry">記帳與預算 / New Entry</li>
+        <li class="nav-item" id="menu-archive">歷史明細 / Archive</li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <button class="btn-lang" id="lang-toggle">ZH / EN / JP</button>
+    </div>
+</div>
+
+<div class="main-content">
 
     <div id="unauthenticated-msg" class="cloud-placeholder">
-        本地測試模式：未登入雲端，資料將暫存於此瀏覽器中。
+        Please sign in with Google to view and manage your ledger.
     </div>
 
-    <div id="authenticated-content">
-        <div class="dashboard">
-            <div class="card">
-                <h3 id="ui-net">Net Value</h3>
-                <p id="balance">$0.00</p>
-            </div>
-            <div class="card">
-                <h3 id="ui-income">Inflow</h3>
-                <p id="income">$0.00</p>
-            </div>
-            <div class="card">
-                <h3 id="ui-expense">Outflow</h3>
-                <p id="expense">$0.00</p>
-            </div>
-        </div>
-
-        <h2 class="history-section-header" id="ui-archive-title">Archive Index</h2>
-        <ul class="transaction-list" id="transaction-list">
-        </ul>
-    </div>
-
-    <div class="interactive-window" id="ledger-window">
-        <div class="window-header-drag" id="window-drag-handle">
-            <h2 id="ui-window-title">New Entry Manifest</h2>
-            <button class="close-window-btn" id="ui-btn-close">&times;</button>
-        </div>
+    <div id="authenticated-content-wrapper" style="display: none;">
         
-        <form id="bookkeeper-form">
-            <div class="form-group">
-                <label for="type" id="ui-lbl-type">Registry Type</label>
-                <select id="type">
-                    <option value="expense" id="ui-opt-expense">Outflow (Expense)</option>
-                    <option value="income" id="ui-opt-income">Inflow (Income)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="category" id="ui-lbl-category">Classification</label>
-                <select id="category">
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="description" id="ui-lbl-desc">Manifest / Memo</label>
-                <input type="text" id="description" placeholder="..." required>
-            </div>
-            <div class="form-group">
-                <label for="amount" id="ui-lbl-amount">Amount ($)</label>
-                <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
+        <div id="page-dashboard" class="tab-page active">
+            <h2 class="page-title" id="ui-title-dashboard">Dashboard Overview</h2>
+            
+            <div class="main-calendar-box">
+                <div class="calendar-controls-left">
+                    <label for="main-date-view" id="ui-lbl-viewdate">Viewing Date:</label>
+                    <input type="date" id="main-date-view">
+                </div>
+                <div class="view-toggle-group">
+                    <button id="btn-view-day" class="view-btn active">單日 / Day</button>
+                    <button id="btn-view-month" class="view-btn">全月 / Month</button>
+                </div>
             </div>
 
-            <button type="submit" class="submit-btn" id="ui-btn-submit">Record Entry</button>
-        </form>
+            <div class="dashboard">
+                <div class="card">
+                    <h3 id="ui-net">資產淨值</h3>
+                    <p id="balance">$0.00</p>
+                </div>
+                <div class="card">
+                    <h3 id="ui-income">收入計</h3>
+                    <p id="income">$0.00</p>
+                </div>
+                <div class="card">
+                    <h3 id="ui-expense">支出計</h3>
+                    <p id="expense">$0.00</p>
+                </div>
+            </div>
+
+            <div class="budget-section">
+                <div class="budget-header">
+                    <h3 id="ui-budget-title">Monthly Budget Plan</h3>
+                    <div class="budget-status" id="budget-status">$0.00 / $0.00</div>
+                </div>
+                <div class="budget-bar-bg">
+                    <div class="budget-bar-fill" id="budget-bar-fill"></div>
+                </div>
+                <div class="budget-alert" id="budget-alert">Budget Limit Exceeded</div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-wrapper" id="chart-wrapper">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+                <div id="no-data-msg" class="no-data-msg" style="display: none;">No expense record found to visualize.</div>
+            </div>
+        </div>
+
+        <div id="page-entry" class="tab-page">
+            <h2 class="page-title" id="ui-title-entry">Record & Schedule Plan</h2>
+            
+            <div class="page-split-grid">
+                <div class="form-container-box">
+                    <form id="bookkeeper-form">
+                        <div class="form-group">
+                            <label for="entry-date" id="ui-lbl-entry-date">Transaction Date</label>
+                            <input type="date" id="entry-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="type" id="ui-lbl-type">Registry Type</label>
+                            <select id="type">
+                                <option value="expense" id="ui-opt-expense">Outflow (Expense)</option>
+                                <option value="income" id="ui-opt-income">Inflow (Income)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category" id="ui-lbl-category">Classification</label>
+                            <select id="category"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="description" id="ui-lbl-desc">Manifest / Memo (Optional)</label>
+                            <input type="text" id="description" placeholder="...">
+                        </div>
+                        <div class="form-group">
+                            <label for="entry-tags" id="ui-lbl-tags">Tags (Optional, space separated)</label>
+                            <input type="text" id="entry-tags">
+                        </div>
+                        <div class="form-group">
+                            <label for="amount" id="ui-lbl-amount">Amount ($)</label>
+                            <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="ui-btn-submit">Record Entry</button>
+                        
+                        <hr class="form-divider">
+                        
+                        <div class="form-group">
+                            <label for="budget-input" id="ui-lbl-budget-setting">Adjust Monthly Budget ($)</label>
+                            <input type="number" id="budget-input" step="1" min="0" placeholder="20000">
+                        </div>
+                        <button type="button" class="submit-btn" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-fine); margin-top:0;" id="ui-btn-budget-update">Update Budget</button>
+                    </form>
+                </div>
+
+                <div class="form-container-box">
+                    <h3 style="font-family: var(--font-serif); font-weight:400; margin-top:0;" id="ui-title-routine">固定收入、支出週期自動記帳</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;" id="ui-desc-routine">設定固定開銷或收入（如房租、薪資、訂閱費），每次打開系統時會自動檢查並補登入。</p>
+                    
+                    <form id="routine-form">
+                        <div class="form-group">
+                            <label for="routine-type" id="ui-lbl-r-type">Type</label>
+                            <select id="routine-type">
+                                <option value="expense" id="ui-opt-r-expense">支出 (Expense)</option>
+                                <option value="income" id="ui-opt-r-income">收入 (Income)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="routine-period" id="ui-lbl-r-period">Frequency</label>
+                            <select id="routine-period">
+                                <option value="monthly" id="ui-opt-r-monthly">每月固定日期 (Monthly)</option>
+                                <option value="weekly" id="ui-opt-r-weekly">每週固定星期幾 (Weekly)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="group-routine-day">
+                            <label for="routine-day" id="ui-lbl-r-day">每月固定扣款、收入日 (1-31號)</label>
+                            <input type="number" id="routine-day" min="1" max="31" placeholder="10">
+                        </div>
+                        <div class="form-group" id="group-routine-weekday" style="display:none;">
+                            <label for="routine-weekday" id="ui-lbl-r-weekday">每週固定扣款日</label>
+                            <select id="routine-weekday">
+                                <option value="1" id="ui-opt-w-1">星期一 (Monday)</option>
+                                <option value="2" id="ui-opt-w-2">星期二 (Tuesday)</option>
+                                <option value="3" id="ui-opt-w-3">星期三 (Wednesday)</option>
+                                <option value="4" id="ui-opt-w-4">星期四 (Thursday)</option>
+                                <option value="5" id="ui-opt-w-5">星期五 (Friday)</option>
+                                <option value="6" id="ui-opt-w-6">星期六 (Saturday)</option>
+                                <option value="0" id="ui-opt-w-0">星期日 (Sunday)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="routine-desc" id="ui-lbl-r-desc">項目名稱/備註 (選填)</label>
+                            <input type="text" id="routine-desc">
+                        </div>
+                        <div class="form-group">
+                            <label for="routine-amount" id="ui-lbl-r-amount">Amount ($)</label>
+                            <input type="number" id="routine-amount" step="0.01" min="0.01" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="submit-btn" style="background-color: var(--bg-card); color:var(--text-main); border:1px solid var(--text-main)" id="ui-btn-r-submit">Add Recurring Task</button>
+                    </form>
+
+                    <hr class="form-divider">
+                    <ul class="routine-list" id="routine-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-archive" class="tab-page">
+            <h2 class="page-title" id="ui-title-archive">Archive Index</h2>
+            
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <label id="ui-lbl-filter-date">Filter by Date</label>
+                    <input type="date" id="filter-date">
+                </div>
+                <div class="filter-group">
+                    <label id="ui-lbl-filter-cat">Filter by Category</label>
+                    <select id="filter-category"></select>
+                </div>
+                <div class="filter-group">
+                    <label id="ui-lbl-filter-name">Search Name/Memo</label>
+                    <input type="text" id="filter-keyword" placeholder="...">
+                </div>
+                <div class="filter-group">
+                    <label id="ui-lbl-filter-tags">Search Tags</label>
+                    <input type="text" id="filter-tags">
+                </div>
+                <button class="btn-art" id="ui-btn-clear-filter">Reset</button>
+            </div>
+
+            <ul class="transaction-list" id="transaction-list"></ul>
+        </div>
+
     </div>
 </div>
 
@@ -447,13 +799,14 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // 💡 注意：請將此處替換為你剛才找到的真實 Firebase 設定！
     const firebaseConfig = {
-        apiKey: "AIzaSyBuv9703YYLkhBRMylEIyhH0P1148h0QqQ",
+        apiKey: "AIzaSyBuv9703YYLkhBRmyleIyhH0P1148h0QqQ",
         authDomain: "bookkeeping-6105c.firebaseapp.com",
         projectId: "bookkeeping-6105c",
         storageBucket: "bookkeeping-6105c.firebasestorage.app",
         messagingSenderId: "126184617636",          
-        appId: "1:126184617636:web:7b0bd61aa1ef04c314d831" 
+        appId: "1:126184617636:web:7b0bd61aa1ef04c314d831"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -463,36 +816,75 @@
 
     const i18n = {
         en: {
-            title: "Studio Balance", subtitle: "Personal Consumption Ledger", openBtn: "— Open Ledger —",
-            windowTitle: "New Entry Manifest", net: "Net Value", income: "Inflow", expense: "Outflow",
-            lblType: "Registry Type", lblCategory: "Classification", lblDesc: "Manifest / Memo", lblAmount: "Amount ($)",
-            optExpense: "Outflow (Expense)", optIncome: "Inflow (Income)", btnSubmit: "Record Entry", archiveTitle: "Archive Index",
-            loginText: "Sign In With Google", logoutText: "Sign Out", loadingTxt: "Synchronizing cloud records...",
-            unauthTxt: "Local Mode: Not signed in. Data saved temporarily in browser storage.",
+            title: "Studio Balance", subtitle: "Cloud Horizon Ledger",
+            menuDashboard: "Dashboard Overview", menuEntry: "Record & Schedule", menuArchive: "Archive Index",
+            viewDate: "Viewing Date:", btnViewDay: "Day", btnViewMonth: "Month",
+            netDay: "Daily Net Value", incomeDay: "Daily Inflow", expenseDay: "Daily Outflow",
+            netMonth: "Monthly Net Value", incomeMonth: "Monthly Inflow", expenseMonth: "Monthly Outflow",
+            lblEntryDate: "Transaction Date", lblType: "Registry Type", lblCategory: "Classification",
+            lblDesc: "Manifest / Memo (Optional)", lblTags: "Tags (Optional, space separated)", lblAmount: "Amount ($)",
+            optExpense: "Outflow (Expense)", optIncome: "Inflow (Income)", btnSubmit: "Record Entry",
+            budgetTitle: "Monthly Budget Plan", lblBudgetSetting: "Adjust Monthly Budget ($)", btnBudgetUpdate: "Update Budget Plan",
+            alertWarning: "Warning: Budget Level at (70%+)", alertExceeded: "Alert: Budget Limit Exceeded!",
+            lblFilterDate: "Filter by Date", lblFilterCat: "Filter by Category", lblFilterName: "Search Name/Memo", lblFilterTags: "Filter by Tag",
+            btnClearFilter: "Reset", allCategories: "— All Categories —",
+            titleRoutine: "Recurring Income & Expense Auto-Ledger", descRoutine: "Set up fix-pattern income/bills to auto-post safely upon cloud account check-in.",
+            lblRType: "Type", lblRPeriod: "Frequency", lblRDay: "Monthly Fix Day (1-31)", lblRWeekday: "Weekly Fix Day",
+            lblRDesc: "Name / Memo (Optional)", lblRAmount: "Amount ($)", btnRSubmit: "Add Recurring Task",
+            noData: "No expense record found to visualize.", placeholderTags: "e.g., #birthday #travel", placeholderRDesc: "If blank, system auto-fills category name",
+            unnamed: "Unnamed", periodMonthly: "Day", periodWeekly: "Every", loginText: "Sign In With Google", logoutText: "Sign Out",
+            loadingTxt: "Synchronizing cloud data...", unauthTxt: "Please sign in with Google to view and manage your ledger.",
+            weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             categories: {
                 expense: ['Food & Dining', 'Transportation', 'Curated & Shopping', 'Arts & Leisure', 'Utilities', 'Living Spaces', 'Uncategorized'],
                 income: ['Salaries', 'Freelance Projects', 'Royalties', 'Grants / Gifts', 'Dividends']
             }
         },
         zh: {
-            title: "日常記帳本", subtitle: "看清每筆生活消費", openBtn: "— 記帳面板 —",
-            windowTitle: "記一筆新收支", net: "總資產淨值", income: "收入總計", expense: "支出總計",
-            lblType: "帳目類型", lblCategory: "項目分類", lblDesc: "消費備註 / 名稱", lblAmount: "金額 ($)",
-            optExpense: "支出", optIncome: "收入", btnSubmit: "確認儲存", archiveTitle: "歷史記帳明細",
-            loginText: "使用 Google 帳戶登入", logoutText: "登出雲端帳戶", loadingTxt: "正在安全同步雲端紀錄...",
-            unauthTxt: "本地測試模式：未登入雲端，資料將暫存於此瀏覽器中。",
+            title: "Studio Balance", subtitle: "雲端美學記帳平台",
+            menuDashboard: "數據主控台", menuEntry: "記帳與自動排程", menuArchive: "歷史明細歸檔",
+            viewDate: "當前檢視日期:", btnViewDay: "單日 / Day", btnViewMonth: "全月 / Month",
+            netDay: "當日資產淨值", incomeDay: "當日收入計", expenseDay: "當日支出計",
+            netMonth: "當月資產淨值", incomeMonth: "當月收入計", expenseMonth: "當月支出計",
+            lblEntryDate: "消費日期", lblType: "帳目類型", lblCategory: "項目項目分類",
+            lblDesc: "消費備註 / 名稱 (選填)", lblTags: "專案活動標籤 (選填，多個請用空格隔開)", lblAmount: "金額 ($)",
+            optExpense: "支出 (Outflow)", optIncome: "收入 (Inflow)", btnSubmit: "確認儲存帳目",
+            budgetTitle: "本月預算控制進度", lblBudgetSetting: "修改每月預算上限 ($)", btnBudgetUpdate: "更新預算額度",
+            alertWarning: "提醒：支出已達預算 70%，請克制消費", alertExceeded: "超支警告：目前消費已超出預算額度！",
+            lblFilterDate: "按日期篩選", lblFilterCat: "按分類查詢", lblFilterName: "搜尋名稱/備註", lblFilterTags: "搜尋指定標籤",
+            btnClearFilter: "重置條件", allCategories: "— 全部項目分類 —",
+            titleRoutine: "固定收入、支出週期自動記帳", descRoutine: "可在此設定固定的開銷或固定收入。每次您登入雲端帳戶時，系統會自動在雲端核對補登，無需手動重複填寫。",
+            lblRType: "收支類型", lblRPeriod: "循環週期", lblRDay: "每月固定扣款、收入日 (1-31號)", lblRWeekday: "每週固定扣款、收入日",
+            lblRDesc: "項目名稱/備註 (選填)", lblRAmount: "固定收支金額 ($)", btnRSubmit: "新增此週期排程",
+            noData: "無支出數據可供視覺化圖表分析。", placeholderTags: "例如：#生日聚餐 #日本行", placeholderRDesc: "若未填寫，系統將代入分類名稱",
+            unnamed: "未命名", periodMonthly: "每個月位在", periodWeekly: "每週固定在禮拜", loginText: "使用 Google 帳戶登入", logoutText: "登出帳戶",
+            loadingTxt: "正在同步雲端資料庫...", unauthTxt: "您目前尚未登入。請使用 Google 帳戶登入以存取與歸檔您的個人記帳紀錄。",
+            weekdays: ["日", "一", "二", "三", "四", "五", "六"],
             categories: {
                 expense: ['餐飲飲食', '交通出行', '日常購物', '休閒娛樂', '水電雜費', '房租居住', '其他支出'],
                 income: ['薪水收入', '外快兼職', '獎金福利', '紅包收到', '投資收益']
             }
         },
         jp: {
-            title: "Studio Balance", subtitle: "消費活動アーカイブ", openBtn: "— 記帳パネル —",
-            windowTitle: "収支エントリー", net: "純資産額計", income: "収入の部", expense: "支出の部",
-            lblType: "勘定タイプ", lblCategory: "項目分類", lblDesc: "摘要・メモ欄", lblAmount: "金額 ($)",
-            optExpense: "支出（Outflow）", optIncome: "収入（Inflow）", btnSubmit: "記録を保存", archiveTitle: "履歴明細インデックス",
-            loginText: "Google ログイン", logoutText: "ログアウト", loadingTxt: "同期中...",
-            unauthTxt: "ローカルモード：クラウド未接続。データはブラウザに一時保存されます。",
+            title: "Studio Balance", subtitle: "クラウド美学家計簿",
+            menuDashboard: "ダッシュボード", menuEntry: "記帳と自動スケジューラ", menuArchive: "履歴アーカイブ",
+            viewDate: "閲覧日:", btnViewDay: "日", btnViewMonth: "月",
+            netDay: "当日の純資産", incomeDay: "当日の収入高", expenseDay: "当日の支出高",
+            netMonth: "今月の純資産", incomeMonth: "今月の収入高", expenseMonth: "今月の支出高",
+            lblEntryDate: "取引日", lblType: "勘定科目タイプ", lblCategory: "項目分類",
+            lblDesc: "摘要・メモ (任意)", lblTags: "タグ (任意、スペース区切り)", lblAmount: "金額 ($)",
+            optExpense: "支出 (Outflow)", optIncome: "収入 (Inflow)", btnSubmit: "エントリーを記録",
+            budgetTitle: "今月の予算管理の進捗", lblBudgetSetting: "毎月の予算上限を調整 ($)", btnBudgetUpdate: "予算設定を更新",
+            alertWarning: "警告：支出が予算の70％に達しました！", alertExceeded: "赤字警告：予算限度額を超過しています！",
+            lblFilterDate: "日付でフィルター", lblFilterCat: "カテゴリーで探す", lblFilterName: "キーワード検索", lblFilterTags: "タグで検索",
+            btnClearFilter: "条件リセット", allCategories: "— 全てのカテゴリー —",
+            titleRoutine: "固定収支の定期自動記録", descRoutine: "家賃、給与、サブスクなどの定期的な固定収支を設定します。ログインすると自動的に同期され、手動の再入力を省きます。",
+            lblRType: "収支タイプ", lblRPeriod: "繰り返し周期", lblRDay: "毎月の固定日 (1-31日)", lblRWeekday: "毎週の固定曜日",
+            lblRDesc: "項目名 / メモ (任意)", lblRAmount: "固定金額 ($)", btnRSubmit: "定期タスクを追加",
+            noData: "可視化できる支出データが見つかりません。", placeholderTags: "例：#誕生日 #旅行", placeholderRDesc: "空欄の場合、自動的にカテゴリー名が代入されます",
+            unnamed: "未命名", periodMonthly: "毎月", periodWeekly: "毎週", loginText: "Googleでログイン", logoutText: "ログアウト",
+            loadingTxt: "クラウドデータを同期中...", unauthTxt: "現在ログアウト状態です。Googleアカウントでログインして、家計簿を管理してください。",
+            weekdays: ["日", "月", "火", "水", "木", "金", "土"],
             categories: {
                 expense: ['食費・外食', '交通費', '買い物・衣服', 'エンタメ・余暇', '水道光熱費', '家賃・住居', 'その他の支出'],
                 income: ['給与収入', '副業・フリーランス', 'ボーナス', 'お祝い金', '投資収益']
@@ -500,20 +892,43 @@
         }
     };
 
-    let currentLang = localStorage.getItem('art_lang') || 'zh';
-    let transactions = [];
     let currentUser = null;
+    let currentLang = localStorage.getItem('art_lang') || 'zh';
+    let currentViewDimension = 'day';
+    let myChart = null;
+
+    let transactions = [];
+    let monthlyBudget = 20000;
+    let routines = [];
+    let routineLogs = [];
 
     const form = document.getElementById('bookkeeper-form');
+    const mainDateView = document.getElementById('main-date-view');
+    const entryDateInput = document.getElementById('entry-date');
     const typeSelect = document.getElementById('type');
     const categorySelect = document.getElementById('category');
     const descriptionInput = document.getElementById('description');
+    const tagsInput = document.getElementById('entry-tags');
     const amountInput = document.getElementById('amount');
+    const budgetInput = document.getElementById('budget-input');
     const list = document.getElementById('transaction-list');
-    const floatingWindow = document.getElementById('ledger-window');
+    const filterDate = document.getElementById('filter-date');
+    const filterCategory = document.getElementById('filter-category');
+    const filterKeyword = document.getElementById('filter-keyword');
+    const filterTags = document.getElementById('filter-tags');
 
-    function toggleWindow(show) {
-        floatingWindow.classList.toggle('active', show);
+    const todayStr = new Date().toISOString().split('T')[0];
+    mainDateView.value = todayStr;
+    entryDateInput.value = todayStr;
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.getElementById(`menu-${tabId}`).classList.add('active');
+        document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
+        document.getElementById(`page-${tabId}`).classList.add('active');
+
+        if (tabId === 'entry') entryDateInput.value = mainDateView.value;
+        if (tabId === 'dashboard') setTimeout(updateUI, 50);
     }
 
     function toggleLanguage() {
@@ -523,86 +938,433 @@
         applyLanguageStrings();
     }
 
-    // 💡 徹底移除自訂盲點彈窗，直接將真實 Error 拋到 console 方便定位
+    function setViewDimension(dimension) {
+        currentViewDimension = dimension;
+        document.getElementById('btn-view-day').classList.toggle('active', dimension === 'day');
+        document.getElementById('btn-view-month').classList.toggle('active', dimension === 'month');
+        updateUI();
+    }
+
+    function clearFilters() {
+        filterDate.value = '';
+        filterCategory.value = 'all';
+        filterKeyword.value = '';
+        filterTags.value = '';
+        updateUI();
+    }
+
+    function toggleRoutinePeriodInputs() {
+        const period = document.getElementById('routine-period').value;
+        document.getElementById('group-routine-day').style.display = period === 'monthly' ? 'block' : 'none';
+        document.getElementById('group-routine-weekday').style.display = period === 'weekly' ? 'block' : 'none';
+    }
+
     function handleAuthAction() {
         if (currentUser) {
-            signOut(auth).catch(err => console.error("Sign out error:", err));
+            signOut(auth).catch(err => console.error("Logout Error:", err));
         } else {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    console.log("登入成功:", result.user);
-                })
-                .catch(err => {
-                    console.error("Firebase Auth Error Details:", err);
-                    alert("登入發生錯誤，請按 F12 開啟開發者工具（Console）查看錯誤代碼。\n錯誤訊息: " + err.message);
-                });
+            signInWithPopup(auth, provider).catch(err => {
+                console.error("Firebase Auth Error:", err);
+                alert("登入失敗: " + err.message);
+            });
         }
     }
-
-    async function pullCloudData(uid) {
-        const docRef = doc(db, "users", uid);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-            transactions = snap.data().transactions || [];
-        } else {
-            transactions = [];
-            await setDoc(docRef, { transactions });
-        }
-    }
-
-    async function pushCloudData() {
-        if (currentUser) {
-            await setDoc(doc(db, "users", currentUser.uid), { transactions }, { merge: true });
-        } else {
-            localStorage.setItem('local_ledger_backup', JSON.stringify(transactions));
-        }
-    }
-
-    document.getElementById('ui-btn-open').addEventListener('click', () => toggleWindow(true));
-    document.getElementById('ui-btn-close').addEventListener('click', () => toggleWindow(false));
-    document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
-    document.getElementById('auth-action-btn').addEventListener('click', handleAuthAction);
-
-    list.addEventListener('click', async (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        if (deleteBtn) {
-            const id = parseInt(deleteBtn.getAttribute('data-id'), 10);
-            if (isNaN(id)) return;
-            transactions = transactions.filter(t => t.id !== id);
-            await pushCloudData();
-            updateUI();
-        }
-    });
 
     onAuthStateChanged(auth, async (user) => {
-        const authBtn = document.getElementById('auth-action-btn');
-        const userInfo = document.getElementById('user-info-ui');
-        const unauthPlaceholder = document.getElementById('unauthenticated-msg');
+        const authActionBtn = document.getElementById('auth-action-btn');
+        const userInfoUi = document.getElementById('user-info-ui');
+        const unauthMsg = document.getElementById('unauthenticated-msg');
+        const authContent = document.getElementById('authenticated-content-wrapper');
 
         if (user) {
             currentUser = user;
             document.getElementById('user-photo').src = user.photoURL || '';
             document.getElementById('user-display-name').textContent = user.displayName || user.email;
             
-            userInfo.style.display = 'flex';
-            authBtn.textContent = i18n[currentLang].logoutText;
-            authBtn.classList.add('logout');
-            unauthPlaceholder.style.display = 'none';
+            userInfoUi.style.display = 'flex';
+            authActionBtn.textContent = i18n[currentLang].logoutText;
+            authActionBtn.classList.add('logout');
+            
+            unauthMsg.textContent = i18n[currentLang].loadingTxt;
+            unauthMsg.style.display = 'block';
+            authContent.style.display = 'none';
 
-            await pullCloudData(user.uid);
+            await pullUserCloudData(user.uid);
+
+            unauthMsg.style.display = 'none';
+            authContent.style.display = 'block';
+            
+            processAutoRoutineChecks();
             updateUI();
         } else {
             currentUser = null;
-            userInfo.style.display = 'none';
-            authBtn.textContent = i18n[currentLang].loginText;
-            authBtn.classList.remove('logout');
-            unauthPlaceholder.textContent = i18n[currentLang].unauthTxt;
-            unauthPlaceholder.style.display = 'block';
+            userInfoUi.style.display = 'none';
+            authActionBtn.textContent = i18n[currentLang].loginText;
+            authActionBtn.classList.remove('logout');
             
-            transactions = JSON.parse(localStorage.getItem('local_ledger_backup')) || [];
-            updateUI();
+            unauthMsg.textContent = i18n[currentLang].unauthTxt;
+            unauthMsg.style.display = 'block';
+            authContent.style.display = 'none';
+
+            transactions = []; routines = []; routineLogs = []; monthlyBudget = 20000;
         }
     });
+
+    async function pullUserCloudData(uid) {
+        try {
+            const userDocRef = doc(db, "users", uid);
+            const snap = await getDoc(userDocRef);
+            if (snap.exists()) {
+                const data = snap.data();
+                transactions = data.transactions || [];
+                routines = data.routines || [];
+                routineLogs = data.routineLogs || [];
+                monthlyBudget = data.monthlyBudget || 20000;
+                budgetInput.value = monthlyBudget;
+            } else {
+                transactions = []; routines = []; routineLogs = []; monthlyBudget = 20000;
+                await pushUserCloudData(uid);
+            }
+        } catch (e) {
+            console.error("Cloud data retrieval failed: ", e);
+        }
+    }
+
+    async function pushUserCloudData(uid) {
+        if (!uid) return;
+        try {
+            await setDoc(doc(db, "users", uid), {
+                transactions, routines, routineLogs, monthlyBudget
+            }, { merge: true });
+        } catch (e) {
+            console.error("Cloud upload failed: ", e);
+        }
+    }
+
+    // 💡 修正：動態監聽與點擊刪除流水帳功能
+    list.addEventListener('click', async (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+            const id = parseFloat(deleteBtn.getAttribute('data-id'));
+            if (!isNaN(id) && currentUser) {
+                transactions = transactions.filter(t => t.id !== id);
+                await pushUserCloudData(currentUser.uid);
+                updateUI(); // 確保立即連動重新渲染圖表與面板
+            }
+        }
+    });
+
+    async function updateBudgetSetting() {
+        const val = parseFloat(budgetInput.value);
+        if (!isNaN(val) && val >= 0 && currentUser) {
+            monthlyBudget = val;
+            await pushUserCloudData(currentUser.uid);
+            updateUI();
+            switchTab('dashboard');
+        }
+    }
+
+    async function addRoutine(e) {
+        e.preventDefault();
+        if (!currentUser) return;
+
+        const rType = document.getElementById('routine-type').value;
+        const rPeriod = document.getElementById('routine-period').value;
+        const rDay = document.getElementById('routine-day').value;
+        const rWeekday = document.getElementById('routine-weekday').value;
+        const rDesc = document.getElementById('routine-desc').value.trim();
+        const rAmount = parseFloat(document.getElementById('routine-amount').value);
+
+        const newRoutine = {
+            id: Date.now(), type: rType, period: rPeriod,
+            day: rDay, weekday: rWeekday, description: rDesc, amount: rAmount
+        };
+
+        routines.push(newRoutine);
+        await pushUserCloudData(currentUser.uid);
+        
+        document.getElementById('routine-desc').value = '';
+        document.getElementById('routine-amount').value = '';
+        
+        renderRoutines();
+        processAutoRoutineChecks();
+        updateUI();
+    }
+
+    // 💡 修正：動態監聽週期排程刪除
+    document.getElementById('routine-list').addEventListener('click', async (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+            const id = parseFloat(deleteBtn.getAttribute('data-id'));
+            if (!isNaN(id) && currentUser) {
+                routines = routines.filter(r => r.id !== id);
+                await pushUserCloudData(currentUser.uid);
+                renderRoutines();
+            }
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+
+        let finalDescription = descriptionInput.value.trim();
+        if (!finalDescription) finalDescription = categorySelect.value;
+
+        let rawTags = tagsInput.value.trim().split(/\s+/).filter(t => t.length > 0);
+        let processedTags = rawTags.map(t => t.startsWith('#') ? t : `#${t}`);
+
+        const entry = {
+            id: Date.now(),
+            date: entryDateInput.value, 
+            type: typeSelect.value,
+            category: categorySelect.value,
+            description: finalDescription,
+            tags: processedTags,
+            amount: parseFloat(amountInput.value)
+        };
+
+        transactions.push(entry);
+        await pushUserCloudData(currentUser.uid);
+        
+        descriptionInput.value = '';
+        tagsInput.value = '';
+        amountInput.value = '';
+        
+        updateUI();
+        switchTab('dashboard');
+    });
+
+    function processAutoRoutineChecks() {
+        if (!currentUser) return;
+        const d = new Date();
+        const currentYear = d.getFullYear();
+        const currentMonth = d.getMonth() + 1;
+        const currentDay = d.getDate(); 
+        const currentDayOfWeek = d.getDay(); 
+
+        let updated = false;
+
+        routines.forEach(r => {
+            let matches = false;
+            let executionKey = ""; 
+
+            if (r.period === 'monthly' && parseInt(r.day) === currentDay) {
+                matches = true;
+                executionKey = `routine-${r.id}-${currentYear}-${currentMonth}-${currentDay}`;
+            } else if (r.period === 'weekly' && parseInt(r.weekday) === currentDayOfWeek) {
+                matches = true;
+                executionKey = `routine-${r.id}-${currentYear}-${currentMonth}-${currentDay}`;
+            }
+
+            if (matches && !routineLogs.includes(executionKey)) {
+                const defaultCat = r.type === 'expense' ? i18n[currentLang].categories.expense[0] : i18n[currentLang].categories.income[0];
+                let finalDesc = r.description || `[Routine] ${defaultCat}`;
+                if (!finalDesc.startsWith('[🔄Auto]')) finalDesc = `[🔄Auto] ${finalDesc}`;
+
+                const autoEntry = {
+                    id: Date.now() + Math.random(),
+                    date: todayStr, type: r.type, category: defaultCat,
+                    description: finalDesc, tags: ['#Auto-Post'], amount: r.amount
+                };
+                transactions.push(autoEntry);
+                routineLogs.push(executionKey);
+                updated = true;
+            }
+        });
+
+        if (updated) pushUserCloudData(currentUser.uid);
+    }
+
+    function renderRoutines() {
+        const rList = document.getElementById('routine-list');
+        const langData = i18n[currentLang];
+        rList.innerHTML = '';
+        routines.forEach(r => {
+            const li = document.createElement('li');
+            li.className = 'routine-item';
+            const periodText = r.period === 'monthly' ? `${langData.periodMonthly} ${r.day}` : `${langData.periodWeekly} ${langData.weekdays[parseInt(r.weekday)]}`;
+            const displayDesc = r.description || `${langData.unnamed} (${r.type === 'expense' ? langData.optExpense : langData.optIncome})`;
+            li.innerHTML = `
+                <div>
+                    <strong>${displayDesc}</strong> <span style="color:var(--text-muted); font-size:0.75rem;">(${periodText})</span>
+                    <br><span style="font-size:0.75rem; color:var(--accent-warm);">${r.type === 'expense' ? langData.optExpense : langData.optIncome} ${formatCurrency(r.amount)}</span>
+                </div>
+                <button class="delete-btn" style="font-size:0.9rem;" data-id="${r.id}">&times;</button>
+            `;
+            rList.appendChild(li);
+        });
+    }
+
+    function updateUI() {
+        list.innerHTML = '';
+        const selectedDate = mainDateView.value;
+        const currentYearMonth = selectedDate.substring(0, 7); 
+
+        const langData = i18n[currentLang];
+        if (currentViewDimension === 'day') {
+            document.getElementById('ui-net').textContent = langData.netDay;
+            document.getElementById('ui-income').textContent = langData.incomeDay;
+            document.getElementById('ui-expense').textContent = langData.expenseDay;
+        } else {
+            document.getElementById('ui-net').textContent = langData.netMonth;
+            document.getElementById('ui-income').textContent = langData.incomeMonth;
+            document.getElementById('ui-expense').textContent = langData.expenseMonth;
+        }
+
+        let displayIncome = 0;
+        let displayExpense = 0;
+        const chartExpenseSummary = {};
+        i18n[currentLang].categories.expense.forEach(cat => { chartExpenseSummary[cat] = 0; });
+
+        let totalMonthlyExpenseForBudget = 0;
+
+        transactions.forEach(t => {
+            if (t.type === 'expense' && t.date && t.date.substring(0, 7) === currentYearMonth) {
+                totalMonthlyExpenseForBudget += t.amount;
+            }
+
+            let isMatch = false;
+            if (currentViewDimension === 'day' && t.date === selectedDate) {
+                isMatch = true;
+            } else if (currentViewDimension === 'month' && t.date && t.date.substring(0, 7) === currentYearMonth) {
+                isMatch = true;
+            }
+
+            if (isMatch) {
+                if (t.type === 'income') {
+                    displayIncome += t.amount;
+                } else {
+                    displayExpense += t.amount;
+                    if (chartExpenseSummary[t.category] !== undefined) {
+                        chartExpenseSummary[t.category] += t.amount;
+                    }
+                }
+            }
+        });
+
+        const netBalance = displayIncome - displayExpense;
+        document.getElementById('balance').textContent = (netBalance < 0 ? '-' : '') + formatCurrency(Math.abs(netBalance));
+        document.getElementById('income').textContent = formatCurrency(displayIncome);
+        document.getElementById('expense').textContent = formatCurrency(displayExpense);
+
+        handleBudgetLogic(totalMonthlyExpenseForBudget);
+        renderChart(chartExpenseSummary);
+
+        // 歷史帳目動態篩選
+        const fDate = filterDate.value;
+        const fCat = filterCategory.value;
+        const fKey = filterKeyword.value.trim().toLowerCase();
+        const fTag = filterTags.value.trim().toLowerCase();
+
+        transactions.slice().reverse().forEach(t => {
+            if (fDate && t.date !== fDate) return;
+            if (fCat !== 'all' && t.category !== fCat) return;
+            if (fKey && !t.description.toLowerCase().includes(fKey)) return;
+            if (fTag && !(t.tags || []).some(tag => tag.toLowerCase().includes(fTag))) return;
+
+            const isIncome = t.type === 'income';
+            const li = document.createElement('li');
+            li.className = 'transaction-item';
+            
+            let tagsHtml = (t.tags || []).map(tag => `<span class="tag-badge">${tag}</span>`).join('');
+
+            li.innerHTML = `
+                <div class="item-details">
+                    <span class="item-desc">
+                        <span class="type-dot ${isIncome ? 'dot-income' : 'dot-expense'}"></span>
+                        ${t.description} ${tagsHtml}
+                    </span>
+                    <span class="item-sub">${t.date} &middot; ${t.category}</span>
+                </div>
+                <div class="right-section">
+                    <span class="item-amount">
+                        ${isIncome ? '+' : '-'}${formatCurrency(t.amount)}
+                    </span>
+                    <button class="delete-btn" data-id="${t.id}">&mdash;</button>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+    }
+
+    function handleBudgetLogic(totalMonthlyExpense) {
+        const statusEl = document.getElementById('budget-status');
+        const barFillEl = document.getElementById('budget-bar-fill');
+        const alertEl = document.getElementById('budget-alert');
+        const langData = i18n[currentLang];
+
+        statusEl.textContent = `${formatCurrency(totalMonthlyExpense)} / ${formatCurrency(monthlyBudget)}`;
+        let percentage = monthlyBudget > 0 ? (totalMonthlyExpense / monthlyBudget) * 100 : 0;
+        barFillEl.style.width = `${Math.min(percentage, 100)}%`;
+
+        if (monthlyBudget === 0) {
+            barFillEl.style.backgroundColor = 'var(--text-muted)';
+            alertEl.style.display = 'none';
+        } else if (percentage >= 100) {
+            barFillEl.style.backgroundColor = 'var(--accent-warning)';
+            alertEl.textContent = langData.alertExceeded;
+            alertEl.style.color = 'var(--accent-warning)';
+            alertEl.style.display = 'block';
+        } else if (percentage >= 70) {
+            barFillEl.style.backgroundColor = 'var(--accent-warm)';
+            alertEl.textContent = langData.alertWarning;
+            alertEl.style.color = 'var(--accent-warm)';
+            alertEl.style.display = 'block';
+        } else {
+            barFillEl.style.backgroundColor = 'var(--text-muted)';
+            alertEl.style.display = 'none';
+        }
+    }
+
+    function renderChart(expenseSummary) {
+        const labels = Object.keys(expenseSummary);
+        const data = Object.values(expenseSummary);
+        const hasExpenses = data.some(val => val > 0);
+
+        const chartWrapper = document.getElementById('chart-wrapper');
+        const noDataMsg = document.getElementById('no-data-msg');
+
+        if (!hasExpenses) {
+            chartWrapper.style.display = 'none';
+            noDataMsg.style.display = 'block';
+            return;
+        } else {
+            chartWrapper.style.display = 'block';
+            noDataMsg.style.display = 'none';
+        }
+
+        const mutedPalette = ['#cca47c', '#a69076', '#8c857b', '#d97706', '#dfcbb5', '#bda88e', '#736b60'];
+
+        if (myChart) {
+            myChart.data.labels = labels;
+            myChart.data.datasets[0].data = data;
+            myChart.update();
+        } else {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'doughnut', 
+                data: {
+                    labels: labels,
+                    datasets: [{ data: data, backgroundColor: mutedPalette, borderWidth: 1, borderColor: '#ffffff' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: '"Helvetica Neue", Arial, sans-serif', size: 11 }, color: '#24221f', padding: 12, boxWidth: 10 }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function formatCurrency(num) {
+        return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
 
     function populateCategories() {
         const type = typeSelect.value;
@@ -614,122 +1376,119 @@
         });
     }
 
-    typeSelect.addEventListener('change', populateCategories);
+    function populateFilterCategories() {
+        const currentSelection = filterCategory.value;
+        filterCategory.innerHTML = '';
+        
+        const allOpt = document.createElement('option');
+        allOpt.value = 'all'; allOpt.textContent = i18n[currentLang].allCategories;
+        filterCategory.appendChild(allOpt);
+
+        const allCats = [...i18n[currentLang].categories.expense, ...i18n[currentLang].categories.income];
+        allCats.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat; option.textContent = cat;
+            filterCategory.appendChild(option);
+        });
+        filterCategory.value = currentSelection || 'all';
+    }
 
     function applyLanguageStrings() {
         const langData = i18n[currentLang];
-        document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
         document.getElementById('ui-title').textContent = langData.title;
         document.getElementById('ui-subtitle').textContent = langData.subtitle;
-        document.getElementById('ui-btn-open').textContent = langData.openBtn;
-        document.getElementById('ui-window-title').textContent = langData.windowTitle;
-        document.getElementById('ui-net').textContent = langData.net;
-        document.getElementById('ui-income').textContent = langData.income;
-        document.getElementById('ui-expense').textContent = langData.expense;
+        
+        document.getElementById('menu-dashboard').innerHTML = currentLang === 'zh' ? '儀表板 / Dashboard' : (currentLang === 'jp' ? 'ダッシュボード' : 'Dashboard');
+        document.getElementById('menu-entry').innerHTML = currentLang === 'zh' ? '記帳與預算 / New Entry' : (currentLang === 'jp' ? '記帳と予算設定' : 'New Entry');
+        document.getElementById('menu-archive').innerHTML = currentLang === 'zh' ? '歷史明細 / Archive' : (currentLang === 'jp' ? '履歴一覧' : 'Archive');
+
+        document.getElementById('ui-title-dashboard').textContent = langData.menuDashboard;
+        document.getElementById('ui-title-entry').textContent = langData.menuEntry;
+        document.getElementById('ui-title-archive').textContent = langData.menuArchive;
+
+        document.getElementById('ui-lbl-viewdate').textContent = langData.viewDate;
+        document.getElementById('btn-view-day').textContent = langData.btnViewDay;
+        document.getElementById('btn-view-month').textContent = langData.btnViewMonth;
+        
+        document.getElementById('ui-lbl-entry-date').textContent = langData.lblEntryDate;
         document.getElementById('ui-lbl-type').textContent = langData.lblType;
         document.getElementById('ui-lbl-category').textContent = langData.lblCategory;
         document.getElementById('ui-lbl-desc').textContent = langData.lblDesc;
+        document.getElementById('ui-lbl-tags').textContent = langData.lblTags;
         document.getElementById('ui-lbl-amount').textContent = langData.lblAmount;
         document.getElementById('ui-opt-expense').textContent = langData.optExpense;
         document.getElementById('ui-opt-income').textContent = langData.optIncome;
         document.getElementById('ui-btn-submit').textContent = langData.btnSubmit;
-        document.getElementById('ui-archive-title').textContent = langData.archiveTitle;
+        document.getElementById('no-data-msg').textContent = langData.noData;
 
-        if (!currentUser) {
-            document.getElementById('unauthenticated-msg').textContent = langData.unauthTxt;
-            document.getElementById('auth-action-btn').textContent = langData.loginText;
+        tagsInput.placeholder = langData.placeholderTags;
+        filterTags.placeholder = langData.placeholderTags;
+        document.getElementById('routine-desc').placeholder = langData.placeholderRDesc;
+        
+        document.getElementById('ui-budget-title').textContent = langData.budgetTitle;
+        document.getElementById('ui-lbl-budget-setting').textContent = langData.lblBudgetSetting;
+        document.getElementById('ui-btn-budget-update').textContent = langData.btnBudgetUpdate;
+
+        document.getElementById('ui-lbl-filter-date').textContent = langData.lblFilterDate;
+        document.getElementById('ui-lbl-filter-cat').textContent = langData.lblFilterCat;
+        document.getElementById('ui-lbl-filter-name').textContent = langData.lblFilterName;
+        document.getElementById('ui-lbl-filter-tags').textContent = langData.lblFilterTags;
+        document.getElementById('ui-btn-clear-filter').textContent = langData.btnClearFilter;
+
+        document.getElementById('ui-title-routine').textContent = langData.titleRoutine;
+        document.getElementById('ui-desc-routine').textContent = langData.descRoutine;
+        document.getElementById('ui-lbl-r-type').textContent = langData.lblRType;
+        document.getElementById('ui-lbl-r-period').textContent = langData.lblRPeriod;
+        document.getElementById('ui-lbl-r-day').textContent = langData.lblRDay;
+        document.getElementById('ui-lbl-r-weekday').textContent = langData.lblRWeekday;
+        document.getElementById('ui-lbl-r-desc').textContent = langData.lblRDesc;
+        document.getElementById('ui-lbl-r-amount').textContent = langData.lblRAmount;
+        document.getElementById('ui-btn-r-submit').textContent = langData.btnRSubmit;
+        
+        document.getElementById('ui-opt-r-expense').textContent = langData.optExpense;
+        document.getElementById('ui-opt-r-income').textContent = langData.optIncome;
+        document.getElementById('ui-opt-r-monthly').textContent = currentLang === 'zh' ? '每月固定日期 (Monthly)' : (currentLang === 'jp' ? '毎月の固定日' : 'Monthly');
+        document.getElementById('ui-opt-r-weekly').textContent = currentLang === 'zh' ? '每週固定星期幾 (Weekly)' : (currentLang === 'jp' ? '毎週の固定曜日' : 'Weekly');
+
+        const authActionBtn = document.getElementById('auth-action-btn');
+        if (currentUser) {
+            authActionBtn.textContent = langData.logoutText;
         } else {
-            document.getElementById('auth-action-btn').textContent = langData.logoutText;
+            authActionBtn.textContent = langData.loginText;
+            document.getElementById('unauthenticated-msg').textContent = langData.unauthTxt;
+        }
+
+        for (let i = 0; i <= 6; i++) {
+            const el = document.getElementById(`ui-opt-w-${i}`);
+            if (el) el.textContent = currentLang === 'zh' ? `星期${langData.weekdays[i]}` : langData.weekdays[i];
         }
 
         populateCategories();
+        populateFilterCategories();
+        renderRoutines();
         updateUI();
     }
 
-    function formatCurrency(num) {
-        return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    }
+    // 事件監聽宣告
+    document.getElementById('menu-dashboard').addEventListener('click', () => switchTab('dashboard'));
+    document.getElementById('menu-entry').addEventListener('click', () => switchTab('entry'));
+    document.getElementById('menu-archive').addEventListener('click', () => switchTab('archive'));
+    document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+    document.getElementById('auth-action-btn').addEventListener('click', handleAuthAction);
+    document.getElementById('btn-view-day').addEventListener('click', () => setViewDimension('day'));
+    document.getElementById('btn-view-month').addEventListener('click', () => setViewDimension('month'));
+    document.getElementById('ui-btn-clear-filter').addEventListener('click', clearFilters);
+    document.getElementById('routine-period').addEventListener('change', toggleRoutinePeriodInputs);
+    document.getElementById('ui-btn-budget-update').addEventListener('click', updateBudgetSetting);
+    document.getElementById('routine-form').addEventListener('submit', addRoutine);
+    typeSelect.addEventListener('change', populateCategories);
 
-    function updateUI() {
-        list.innerHTML = '';
-        let totalIncome = 0;
-        let totalExpense = 0;
-
-        transactions.slice().reverse().forEach(t => {
-            const isIncome = t.type === 'income';
-            if (isIncome) totalIncome += t.amount;
-            else totalExpense += t.amount;
-
-            const li = document.createElement('li');
-            li.className = 'transaction-item';
-            li.innerHTML = `
-                <div class="item-details">
-                    <span class="item-desc">
-                        <span class="type-dot ${isIncome ? 'dot-income' : 'dot-expense'}"></span>
-                        ${t.description}
-                    </span>
-                    <span class="item-sub">${t.category}</span>
-                </div>
-                <div class="right-section">
-                    <span class="item-amount">
-                        ${isIncome ? '+' : '-'}${formatCurrency(t.amount)}
-                    </span>
-                    <button class="delete-btn" data-id="${t.id}">&mdash;</button>
-                </div>
-            `;
-            list.appendChild(li);
-        });
-
-        const netBalance = totalIncome - totalExpense;
-        document.getElementById('balance').textContent = (netBalance < 0 ? '-' : '') + formatCurrency(Math.abs(netBalance));
-        document.getElementById('income').textContent = formatCurrency(totalIncome);
-        document.getElementById('expense').textContent = formatCurrency(totalExpense);
-    }
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const entry = {
-            id: Date.now(),
-            type: typeSelect.value,
-            category: categorySelect.value,
-            description: descriptionInput.value,
-            amount: parseFloat(amountInput.value)
-        };
-
-        transactions.push(entry);
-        await pushCloudData();
-        
-        descriptionInput.value = '';
-        amountInput.value = '';
-        toggleWindow(false); 
-        updateUI();
-    });
-
-    // --- 拖曳視窗邏輯 ---
-    const dragHandle = document.getElementById("window-drag-handle");
-    let isDragging = false;
-    let offsetX = 0, offsetY = 0;
-
-    dragHandle.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        offsetX = e.clientX - floatingWindow.getBoundingClientRect().left;
-        offsetY = e.clientY - floatingWindow.getBoundingClientRect().top;
-        document.addEventListener("mousemove", dragWindow);
-        document.addEventListener("mouseup", stopDragWindow);
-    });
-
-    function dragWindow(e) {
-        if (!isDragging) return;
-        floatingWindow.style.left = `${e.clientX - offsetX}px`;
-        floatingWindow.style.top = `${e.clientY - offsetY}px`;
-    }
-
-    function stopDragWindow() {
-        isDragging = false;
-        document.removeEventListener("mousemove", dragWindow);
-        document.removeEventListener("mouseup", stopDragWindow);
-    }
+    // 篩選與日期即時更新
+    mainDateView.addEventListener('change', updateUI);
+    filterDate.addEventListener('change', updateUI);
+    filterCategory.addEventListener('change', updateUI);
+    filterKeyword.addEventListener('input', updateUI);
+    filterTags.addEventListener('input', updateUI);
 
     applyLanguageStrings();
 </script>
