@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDIO BALANCE — Warm Elegant Ledger</title>
+    <style>
+        :root {
+            /* Warm Creamy Gallery Palette */
+            --bg-main: #fbf9f4;       /* Soft cream / ivory canvas */
+            --bg-card: #f5f0e6;       /* Warm buttery stone tone */
+            --bg-window: #ffffff;     /* Pure white for the interactive window */
+            --text-main: #24221f;     /* Warm charcoal */
+            --text-muted: #8c857b;    /* Subdued warm grey */
+            --border-fine: #e6dfd3;   /* Delicate muted amber line */
+            --accent-warm: #d97706;   /* Warm amber accent */
+            --accent-warning: #b91c1c;/* Warning color */
+            
+            --font-serif: "Playfair Display", "Didot", "Georgia", serif;
+            --font-sans: "-apple-system", "BlinkMacSystemFont", "Helvetica Neue", "Arial", sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+        }
+
+        /* Top Header Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--text-main);
+            padding-bottom: 25px;
+            margin-bottom: 45px;
+        }
+
+        .brand-section h1 {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 400;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .brand-section p {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin: 8px 0 0 0;
+        }
+
+        /* User Profile UI Components */
+        .user-profile-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            padding: 8px 12px;
+            background-color: var(--bg-card);
+            border: 1px dashed var(--border-fine);
+        }
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--border-fine);
+        }
+        .user-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Interactive Controls */
+        .btn-art {
+            background: none;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-art:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+        }
+
+        .btn-trigger-window {
+            background-color: var(--bg-card);
+            border-color: var(--border-fine);
+        }
+        
+        .btn-auth {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+        }
+        .btn-auth.logout {
+            background-color: transparent;
+            color: var(--text-main);
+        }
+
+        /* Status Banner for Local Mode */
+        .cloud-placeholder {
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-fine);
+            background-color: rgba(245, 240, 230, 0.4);
+            margin-bottom: 30px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Modern Creamy Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            border: 1px solid var(--border-fine);
+            margin-bottom: 50px;
+            background-color: var(--bg-card);
+        }
+
+        .card {
+            padding: 25px;
+            text-align: left;
+            border-right: 1px solid var(--border-fine);
+        }
+
+        .card:last-child {
+            border-right: none;
+        }
+
+        .card h3 {
+            margin: 0 0 15px 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 500;
+        }
+
+        .card p {
+            margin: 0;
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 400;
+        }
+
+        /* Draggable Floating Window System */
+        .interactive-window {
+            position: fixed;
+            top: 15%;
+            left: calc(50% - 230px);
+            background: var(--bg-window);
+            border: 1px solid var(--text-main);
+            padding: 0 30px 30px 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(36, 34, 31, 0.15);
+            z-index: 2000;
+            display: none;
+            box-sizing: border-box;
+        }
+
+        .interactive-window.active {
+            display: block;
+        }
+
+        .window-header-drag {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0 15px 0;
+            border-bottom: 1px solid var(--border-fine);
+            cursor: move;
+            user-select: none;
+            margin-bottom: 25px;
+        }
+
+        .window-header-drag h2 {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 400;
+            pointer-events: none;
+        }
+
+        .close-window-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0 5px;
+            line-height: 1;
+        }
+
+        .close-window-btn:hover {
+            color: var(--text-main);
+        }
+
+        /* Editorial Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid var(--border-fine);
+            background: transparent;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            border-radius: 0;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-bottom-color: var(--text-main);
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: opacity 0.2s ease;
+        }
+
+        button.submit-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* History Index */
+        .history-section-header {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-fine);
+        }
+
+        .transaction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .transaction-item {
+            padding: 18px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-fine);
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-desc {
+            font-size: 1rem;
+        }
+
+        .item-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .right-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .item-amount {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            margin-right: 20px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            color: var(--accent-warning);
+        }
+
+        .type-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .dot-income { background-color: var(--accent-warm); }
+        .dot-expense { background-color: var(--text-muted); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand-section">
+            <h1 id="ui-title">Studio Balance</h1>
+            <p id="ui-subtitle">Personal Consumption Ledger</p>
+            <div class="user-profile-box" id="user-info-ui" style="display: none;">
+                <img id="user-photo" class="user-avatar" src="" alt="Avatar">
+                <span id="user-display-name" class="user-name">Loading...</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="action-row">
+                <button class="btn-art btn-trigger-window" id="ui-btn-open">— 記帳面板 —</button>
+                <button class="btn-art" id="lang-toggle">ZH</button>
+            </div>
+            <div class="action-row" style="margin-top: 8px;">
+                <button class="btn-art btn-auth" id="auth-action-btn">Sign In With Google</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 💡 本地狀態提示橫幅 -->
+    <div id="unauthenticated-msg" class="cloud-placeholder">
+        本地測試模式：未登入雲端，資料將暫存於此瀏覽器中。
+    </div>
+
+    <!-- 💡 讓記帳主體預設直接顯示，不再強制鎖死隱藏 -->
+    <div id="authenticated-content">
+        <div class="dashboard">
+            <div class="card">
+                <h3 id="ui-net">Net Value</h3>
+                <p id="balance">$0.00</p>
+            </div>
+            <div class="card">
+                <h3 id="ui-income">Inflow</h3>
+                <p id="income">$0.00</p>
+            </div>
+            <div class="card">
+                <h3 id="ui-expense">Outflow</h3>
+                <p id="expense">$0.00</p>
+            </div>
+        </div>
+
+        <h2 class="history-section-header" id="ui-archive-title">Archive Index</h2>
+        <ul class="transaction-list" id="transaction-list">
+        </ul>
+    </div>
+
+    <div class="interactive-window" id="ledger-window">
+        <div class="window-header-drag" id="window-drag-handle">
+            <h2 id="ui-window-title">New Entry Manifest</h2>
+            <button class="close-window-btn" id="ui-btn-close">&times;</button>
+        </div>
+        
+        <form id="bookkeeper-form">
+            <div class="form-group">
+                <label for="type" id="ui-lbl-type">Registry Type</label>
+                <select id="type">
+                    <option value="expense" id="ui-opt-expense">Outflow (Expense)</option>
+                    <option value="income" id="ui-opt-income">Inflow (Income)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="category" id="ui-lbl-category">Classification</label>
+                <select id="category">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description" id="ui-lbl-desc">Manifest / Memo</label>
+                <input type="text" id="description" placeholder="..." required>
+            </div>
+            <div class="form-group">
+                <label for="amount" id="ui-lbl-amount">Amount ($)</label>
+                <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
+            </div>
+
+            <button type="submit" class="submit-btn" id="ui-btn-submit">Record Entry</button>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBuv9703YYLkhBRmyleIyhH0P1148h0QqQ",
+        authDomain: "bookkeeping-6105c.firebaseapp.com",
+        projectId: "bookkeeping-6105c",
+        storageBucket: "bookkeeping-6105c.firebasestorage.app",
+        messagingSenderId: "126184617636",          
+        appId: "1:126184617636:web:7b0bd61aa1ef04c314d831" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const i18n = {
+        en: {
+            title: "Studio Balance", subtitle: "Personal Consumption Ledger", openBtn: "— Open Ledger —",
+            windowTitle: "New Entry Manifest", net: "Net Value", income: "Inflow", expense: "Outflow",
+            lblType: "Registry Type", lblCategory: "Classification", lblDesc: "Manifest / Memo", lblAmount: "Amount ($)",
+            optExpense: "Outflow (Expense)", optIncome: "Inflow (Income)", btnSubmit: "Record Entry", archiveTitle: "Archive Index",
+            loginText: "Sign In With Google", logoutText: "Sign Out", loadingTxt: "Synchronizing cloud records...",
+            unauthTxt: "Local Mode: Not signed in. Data saved temporarily in browser storage.",
+            categories: {
+                expense: ['Food & Dining', 'Transportation', 'Curated & Shopping', 'Arts & Leisure', 'Utilities', 'Living Spaces', 'Uncategorized'],
+                income: ['Salaries', 'Freelance Projects', 'Royalties', 'Grants / Gifts', 'Dividends']
+            }
+        },
+        zh: {
+            title: "日常記帳本", subtitle: "看清每筆生活消費", openBtn: "— 記帳面板 —",
+            windowTitle: "記一筆新收支", net: "總資產淨值", income: "收入總計", expense: "支出總計",
+            lblType: "帳目類型", lblCategory: "項目分類", lblDesc: "消費備註 / 名稱", lblAmount: "金額 ($)",
+            optExpense: "支出", optIncome: "收入", btnSubmit: "確認儲存", archiveTitle: "歷史記帳明細",
+            loginText: "使用 Google 帳戶登入", logoutText: "登出雲端帳戶", loadingTxt: "正在安全同步雲端紀錄...",
+            unauthTxt: "本地測試模式：未登入雲端，資料將暫存於此瀏覽器中。",
+            categories: {
+                expense: ['餐飲飲食', '交通出行', '日常購物', '休閒娛樂', '水電雜費', '房租居住', '其他支出'],
+                income: ['薪水收入', '外快兼職', '獎金福利', '紅包收到', '投資收益']
+            }
+        },
+        jp: {
+            title: "Studio Balance", subtitle: "消費活動アーカイブ", openBtn: "— 記帳パネル —",
+            windowTitle: "収支エントリー", net: "純資産額計", income: "収入の部", expense: "支出の部",
+            lblType: "勘定タイプ", lblCategory: "項目分類", lblDesc: "摘要・メモ欄", lblAmount: "金額 ($)",
+            optExpense: "支出（Outflow）", optIncome: "収入（Inflow）", btnSubmit: "記録を保存", archiveTitle: "履歴明細インデックス",
+            loginText: "Google ログイン", logoutText: "ログアウト", loadingTxt: "同期中...",
+            unauthTxt: "ローカルモード：クラウド未接続。データはブラウザに一時保存されます。",
+            categories: {
+                expense: ['食費・外食', '交通費', '買い物・衣服', 'エンタメ・余暇', '水道光熱費', '家賃・住居', 'その他の支出'],
+                income: ['給与収入', '副業・フリーランス', 'ボーナス', 'お祝い金', '投資収益']
+            }
+        }
+    };
+
+    let currentLang = localStorage.getItem('art_lang') || 'zh';
+    let transactions = [];
+    let currentUser = null;
+
+    const form = document.getElementById('bookkeeper-form');
+    const typeSelect = document.getElementById('type');
+    const categorySelect = document.getElementById('category');
+    const descriptionInput = document.getElementById('description');
+    const amountInput = document.getElementById('amount');
+    const list = document.getElementById('transaction-list');
+    const floatingWindow = document.getElementById('ledger-window');
+
+    // 💡 關鍵優化：移除安全鎖，讓未登入狀態也能隨時打開記帳面板
+    function toggleWindow(show) {
+        floatingWindow.classList.toggle('active', show);
+    }
+
+    function toggleLanguage() {
+        const order = ['zh', 'en', 'jp'];
+        currentLang = order[(order.indexOf(currentLang) + 1) % order.length];
+        localStorage.setItem('art_lang', currentLang);
+        applyLanguageStrings();
+    }
+
+    function handleAuthAction() {
+        if (currentUser) {
+            signOut(auth).catch(err => console.error("Sign out error:", err));
+        } else {
+            signInWithPopup(auth, provider).catch(err => {
+                console.warn("Popup blocked, trying redirect...", err);
+                signInWithRedirect(auth, provider).catch(redirectErr => {
+                    console.error("Redirect error:", redirectErr);
+                    alert("驗證被瀏覽器阻擋！請不要直接雙擊打開網頁檔案，建議使用 VS Code Live Server，或是將網頁部署到網路服務上。");
+                });
+            });
+        }
+    }
+
+    async function pullCloudData(uid) {
+        const docRef = doc(db, "users", uid);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+            transactions = snap.data().transactions || [];
+        } else {
+            transactions = [];
+            await setDoc(docRef, { transactions });
+        }
+    }
+
+    async function pushCloudData() {
+        if (currentUser) {
+            await setDoc(doc(db, "users", currentUser.uid), { transactions }, { merge: true });
+        } else {
+            // 💡 關鍵優化：如果沒有登入，改為儲存到本地 LocalStorage
+            localStorage.setItem('local_ledger_backup', JSON.stringify(transactions));
+        }
+    }
+
+    document.getElementById('ui-btn-open').addEventListener('click', () => toggleWindow(true));
+    document.getElementById('ui-btn-close').addEventListener('click', () => toggleWindow(false));
+    document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+    document.getElementById('auth-action-btn').addEventListener('click', handleAuthAction);
+
+    list.addEventListener('click', async (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+            const id = parseInt(deleteBtn.getAttribute('data-id'), 10);
+            if (isNaN(id)) return;
+            transactions = transactions.filter(t => t.id !== id);
+            await pushCloudData();
+            updateUI();
+        }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        const authBtn = document.getElementById('auth-action-btn');
+        const userInfo = document.getElementById('user-info-ui');
+        const unauthPlaceholder = document.getElementById('unauthenticated-msg');
+
+        if (user) {
+            currentUser = user;
+            document.getElementById('user-photo').src = user.photoURL || '';
+            document.getElementById('user-display-name').textContent = user.displayName || user.email;
+            
+            userInfo.style.display = 'flex';
+            authBtn.textContent = i18n[currentLang].logoutText;
+            authBtn.classList.add('logout');
+            unauthPlaceholder.textContent = i18n[currentLang].loadingTxt;
+
+            await pullCloudData(user.uid);
+            unauthPlaceholder.style.display = 'none';
+            updateUI();
+        } else {
+            currentUser = null;
+            userInfo.style.display = 'none';
+            authBtn.textContent = i18n[currentLang].loginText;
+            authBtn.classList.remove('logout');
+            unauthPlaceholder.textContent = i18n[currentLang].unauthTxt;
+            unauthPlaceholder.style.display = 'block';
+            
+            // 💡 關鍵優化：未登入時自動載入本地暫存，確保網頁能百分之百運作
+            transactions = JSON.parse(localStorage.getItem('local_ledger_backup')) || [];
+            updateUI();
+        }
+    });
+
+    function populateCategories() {
+        const type = typeSelect.value;
+        categorySelect.innerHTML = '';
+        i18n[currentLang].categories[type].forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat; option.textContent = cat;
+            categorySelect.appendChild(option);
+        });
+    }
+
+    typeSelect.addEventListener('change', populateCategories);
+
+    function applyLanguageStrings() {
+        const langData = i18n[currentLang];
+        document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
+        document.getElementById('ui-title').textContent = langData.title;
+        document.getElementById('ui-subtitle').textContent = langData.subtitle;
+        document.getElementById('ui-btn-open').textContent = langData.openBtn;
+        document.getElementById('ui-window-title').textContent = langData.windowTitle;
+        document.getElementById('ui-net').textContent = langData.net;
+        document.getElementById('ui-income').textContent = langData.income;
+        document.getElementById('ui-expense').textContent = langData.expense;
+        document.getElementById('ui-lbl-type').textContent = langData.lblType;
+        document.getElementById('ui-lbl-category').textContent = langData.lblCategory;
+        document.getElementById('ui-lbl-desc').textContent = langData.lblDesc;
+        document.getElementById('ui-lbl-amount').textContent = langData.lblAmount;
+        document.getElementById('ui-opt-expense').textContent = langData.optExpense;
+        document.getElementById('ui-opt-income').textContent = langData.optIncome;
+        document.getElementById('ui-btn-submit').textContent = langData.btnSubmit;
+        document.getElementById('ui-archive-title').textContent = langData.archiveTitle;
+
+        if (!currentUser) {
+            document.getElementById('unauthenticated-msg').textContent = langData.unauthTxt;
+            document.getElementById('auth-action-btn').textContent = langData.loginText;
+        } else {
+            document.getElementById('auth-action-btn').textContent = langData.logoutText;
+        }
+
+        populateCategories();
+        updateUI();
+    }
+
+    function formatCurrency(num) {
+        return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    function updateUI() {
+        list.innerHTML = '';
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        transactions.slice().reverse().forEach(t => {
+            const isIncome = t.type === 'income';
+            if (isIncome) totalIncome += t.amount;
+            else totalExpense += t.amount;
+
+            const li = document.createElement('li');
+            li.className = 'transaction-item';
+            li.innerHTML = `
+                <div class="item-details">
+                    <span class="item-desc">
+                        <span class="type-dot ${isIncome ? 'dot-income' : 'dot-expense'}"></span>
+                        ${t.description}
+                    </span>
+                    <span class="item-sub">${t.category}</span>
+                </div>
+                <div class="right-section">
+                    <span class="item-amount">
+                        ${isIncome ? '+' : '-'}${formatCurrency(t.amount)}
+                    </span>
+                    <button class="delete-btn" data-id="${t.id}">&mdash;</button>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+
+        const netBalance = totalIncome - totalExpense;
+        document.getElementById('balance').textContent = (netBalance < 0 ? '-' : '') + formatCurrency(Math.abs(netBalance));
+        document.getElementById('income').textContent = formatCurrency(totalIncome);
+        document.getElementById('expense').textContent = formatCurrency(totalExpense);
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const entry = {
+            id: Date.now(),
+            type: typeSelect.value,
+            category: categorySelect.value,
+            description: descriptionInput.value,
+            amount: parseFloat(amountInput.value)
+        };
+
+        transactions.push(entry);
+        await pushCloudData();
+        
+        descriptionInput.value = '';
+        amountInput.value = '';
+        toggleWindow(false); 
+        updateUI();
+    });
+
+    // --- 拖曳視窗邏輯 ---
+    const dragHandle = document.getElementById("window-drag-handle");
+    let isDragging = false;
+    let offsetX = 0, offsetY = 0;
+
+    dragHandle.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        offsetX = e.clientX - floatingWindow.getBoundingClientRect().left;
+        offsetY = e.clientY - floatingWindow.getBoundingClientRect().top;
+        document.addEventListener("mousemove", dragWindow);
+        document.addEventListener("mouseup", stopDragWindow);
+    });
+
+    function dragWindow(e) {
+        if (!isDragging) return;
+        floatingWindow.style.left = `${e.clientX - offsetX}px`;
+        floatingWindow.style.top = `${e.clientY - offsetY}px`;
+    }
+
+    function stopDragWindow() {
+        isDragging = false;
+        document.removeEventListener("mousemove", dragWindow);
+        document.removeEventListener("mouseup", stopDragWindow);
+    }
+
+    applyLanguageStrings();
+</script>
+
+</body>
+</html>
