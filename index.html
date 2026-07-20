@@ -384,12 +384,10 @@
         </div>
     </header>
 
-    <!-- 💡 本地狀態提示橫幅 -->
     <div id="unauthenticated-msg" class="cloud-placeholder">
         本地測試模式：未登入雲端，資料將暫存於此瀏覽器中。
     </div>
 
-    <!-- 💡 讓記帳主體預設直接顯示，不再強制鎖死隱藏 -->
     <div id="authenticated-content">
         <div class="dashboard">
             <div class="card">
@@ -446,7 +444,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -514,7 +512,6 @@
     const list = document.getElementById('transaction-list');
     const floatingWindow = document.getElementById('ledger-window');
 
-    // 💡 關鍵優化：移除安全鎖，讓未登入狀態也能隨時打開記帳面板
     function toggleWindow(show) {
         floatingWindow.classList.toggle('active', show);
     }
@@ -526,17 +523,19 @@
         applyLanguageStrings();
     }
 
+    // 💡 徹底移除自訂盲點彈窗，直接將真實 Error 拋到 console 方便定位
     function handleAuthAction() {
         if (currentUser) {
             signOut(auth).catch(err => console.error("Sign out error:", err));
         } else {
-            signInWithPopup(auth, provider).catch(err => {
-                console.warn("Popup blocked, trying redirect...", err);
-                signInWithRedirect(auth, provider).catch(redirectErr => {
-                    console.error("Redirect error:", redirectErr);
-                    alert("驗證被瀏覽器阻擋！請不要直接雙擊打開網頁檔案，建議使用 VS Code Live Server，或是將網頁部署到網路服務上。");
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("登入成功:", result.user);
+                })
+                .catch(err => {
+                    console.error("Firebase Auth Error Details:", err);
+                    alert("登入發生錯誤，請按 F12 開啟開發者工具（Console）查看錯誤代碼。\n錯誤訊息: " + err.message);
                 });
-            });
         }
     }
 
@@ -555,7 +554,6 @@
         if (currentUser) {
             await setDoc(doc(db, "users", currentUser.uid), { transactions }, { merge: true });
         } else {
-            // 💡 關鍵優化：如果沒有登入，改為儲存到本地 LocalStorage
             localStorage.setItem('local_ledger_backup', JSON.stringify(transactions));
         }
     }
@@ -589,10 +587,9 @@
             userInfo.style.display = 'flex';
             authBtn.textContent = i18n[currentLang].logoutText;
             authBtn.classList.add('logout');
-            unauthPlaceholder.textContent = i18n[currentLang].loadingTxt;
+            unauthPlaceholder.style.display = 'none';
 
             await pullCloudData(user.uid);
-            unauthPlaceholder.style.display = 'none';
             updateUI();
         } else {
             currentUser = null;
@@ -602,7 +599,6 @@
             unauthPlaceholder.textContent = i18n[currentLang].unauthTxt;
             unauthPlaceholder.style.display = 'block';
             
-            // 💡 關鍵優化：未登入時自動載入本地暫存，確保網頁能百分之百運作
             transactions = JSON.parse(localStorage.getItem('local_ledger_backup')) || [];
             updateUI();
         }
