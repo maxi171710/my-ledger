@@ -1,28 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STUDIO BALANCE — Cloud Horizon Ledger</title>
+    <title>Studio Balance Design Horizon & Planner</title>
+    <!-- 引入高質感無襯線字體 Inter、JetBrains Mono 與 Playfair Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入 Google Identity Services API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
-            /* Warm Creamy Gallery Palette */
-            --bg-main: #fbf9f4;       /* Soft cream / ivory canvas */
-            --bg-card: #f5f0e6;       /* Warm buttery stone tone */
-            --bg-window: #ffffff;     /* Pure white */
-            --text-main: #24221f;     /* Warm charcoal */
-            --text-muted: #8c857b;    /* Subdued warm grey */
-            --border-fine: #e6dfd3;   /* Delicate muted amber line */
-            --accent-warm: #d97706;   /* Warm amber accent */
-            --accent-warning: #b91c1c;/* Crimson warning */
+            /* Soft Warm Creamy Gallery Palette */
+            --bg-main: #fbf9f4;
+            --bg-card: #f3eee3;
+            --bg-window: #ffffff;
+            --text-main: #2c2825;
+            --text-muted: #8c857b;
+            --border-fine: #e8e2d5;
+            --accent-warm: #d97706;
+            --accent-warning: #b91c1c;
+
+            --font-serif: "Playfair Display", "Georgia", serif;
+            --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            --font-num: "JetBrains Mono", "Inter", monospace;
             
-            --font-serif: "Playfair Display", "Didot", "Georgia", serif;
-            --font-sans: "-apple-system", "BlinkMacSystemFont", "Helvetica Neue", "Arial", sans-serif;
-            --sidebar-width: 260px;
+            --sidebar-width: 280px;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .num-font, .pomo-time, #balance, #income, #expense, .sch-time, .transaction-item span, #budget-status, .todo-time-tag {
+            font-family: var(--font-num) !important;
+            font-variant-numeric: tabular-nums lining-nums;
         }
 
         body {
-            font-family: var(--font-sans);
             background-color: var(--bg-main);
             color: var(--text-main);
             margin: 0;
@@ -30,1468 +52,1661 @@
             display: flex;
             min-height: 100vh;
             letter-spacing: -0.01em;
-            -webkit-font-smoothing: antialiased;
-            box-sizing: border-box;
+            line-height: 1.5;
         }
 
-        /* --- 左側邊欄目錄 Sidebar --- */
+        /* --- 左側邊欄 Sidebar --- */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--bg-card);
             border-right: 1px solid var(--border-fine);
             position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            padding: 40px 24px;
+            top: 0; bottom: 0; left: 0;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
+            overflow-y: auto;
             z-index: 100;
         }
 
         .brand-section h1 {
             font-family: var(--font-serif);
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 400;
             margin: 0;
             line-height: 1.1;
         }
 
         .brand-section p {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: var(--text-muted);
-            margin: 8px 0 0 0;
+            margin: 6px 0 0 0;
         }
 
-        /* 用戶登入資訊區塊 */
-        .user-profile-box {
+        /* Google 登入卡片樣式 */
+        .auth-section {
             margin-top: 20px;
             padding: 12px;
-            border: 1px dashed var(--border-fine);
-            background-color: rgba(255,255,255,0.5);
-            font-size: 0.8rem;
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-md);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            gap: 10px;
         }
-        .user-info {
+
+        .user-profile {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            width: 100%;
         }
+
         .user-avatar {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border: 1px solid var(--border-fine);
+            object-fit: cover;
         }
+
+        .user-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
         .user-name {
+            font-size: 0.8rem;
             font-weight: 600;
+            color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 150px;
         }
-        .auth-btn {
-            background: var(--text-main);
-            color: var(--bg-main);
+
+        .user-email {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-logout {
+            background: none;
             border: none;
-            padding: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            color: var(--accent-warning);
+            font-size: 0.72rem;
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            width: 100%;
-            text-align: center;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
         }
-        .auth-btn.logout {
-            background: transparent;
-            border: 1px solid var(--text-main);
-            color: var(--text-main);
-        }
+        .btn-logout:hover { background: rgba(185, 28, 28, 0.08); }
 
         .nav-menu {
             list-style: none;
             padding: 0;
-            margin: 30px 0 auto 0;
+            margin: 20px 0 0 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .nav-item {
             padding: 12px 16px;
             font-size: 0.85rem;
             font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s ease;
-            border-left: 2px solid transparent;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .nav-item:hover, .nav-item.active {
             color: var(--text-main);
-            background-color: rgba(36, 34, 31, 0.04);
-            border-left-color: var(--text-main);
+            background-color: rgba(44, 40, 37, 0.06);
+        }
+
+        .sub-menu {
+            display: none;
+            list-style: none;
+            padding-left: 12px;
+            margin: 4px 0;
+        }
+
+        .sub-menu.open { display: block; }
+
+        .sub-item {
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: var(--radius-sm);
+        }
+
+        .sub-item:hover, .sub-item.active { 
+            color: var(--text-main); 
+            background-color: rgba(44, 40, 37, 0.04);
+            font-weight: 600;
         }
 
         .sidebar-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-fine);
         }
 
         .btn-lang {
-            background: none;
-            border: 1px solid var(--text-main);
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
             color: var(--text-main);
-            padding: 6px 12px;
-            font-size: 0.7rem;
+            padding: 8px 14px;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
-            text-transform: uppercase;
+            border-radius: var(--radius-full);
+            width: 100%;
+            transition: background 0.2s;
         }
+
         .btn-lang:hover {
-            background-color: var(--text-main);
+            background: var(--text-main);
             color: var(--bg-main);
         }
 
-        /* --- 右側內容主區塊 --- */
+        /* --- 右側內容區 --- */
         .main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
-            padding: 50px 5%; 
+            padding: 40px 5%;
             width: calc(100% - var(--sidebar-width));
-            box-sizing: border-box;
         }
 
-        .cloud-placeholder {
-            text-align: center;
-            padding: 100px 0;
-            font-family: var(--font-serif);
-            font-size: 1.5rem;
-            color: var(--text-muted);
-        }
+        .tab-page { display: none; width: 100%; }
+        .tab-page.active { display: block; }
 
-        /* 分頁切換 */
-        .tab-page {
-            display: none;
-            width: 100%;
-        }
-        .tab-page.active {
-            display: block;
-        }
-
-        /* 標題樣式 */
         .page-title {
-            font-family: var(--font-serif);
-            font-size: 2.2rem;
-            font-weight: 400;
-            margin: 0 0 30px 0;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--text-main);
-            width: 100%;
-        }
-
-        /* 主日曆與維度切換區塊 */
-        .main-calendar-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-fine);
-            padding: 12px 24px;
-            margin-bottom: 30px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .calendar-controls-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .main-calendar-box label {
-            margin: 0;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--text-main);
-        }
-
-        /* 日/月檢視維度按鈕 */
-        .view-toggle-group {
-            display: flex;
-            border: 1px solid var(--text-main);
-        }
-
-        .view-btn {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            padding: 6px 14px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
-        }
-
-        .view-btn.active {
-            background-color: var(--text-main);
-            color: var(--bg-main);
-        }
-
-        /* 數據看板 */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            border: 1px solid var(--border-fine);
-            margin-bottom: 30px;
-            background-color: var(--bg-card);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .card {
-            padding: 30px;
-            text-align: left;
-            border-right: 1px solid var(--border-fine);
-        }
-
-        .card:last-child {
-            border-right: none;
-        }
-
-        .card h3 {
-            margin: 0 0 15px 0;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            font-weight: 500;
-        }
-
-        .card p {
-            margin: 0;
             font-family: var(--font-serif);
             font-size: 2rem;
             font-weight: 400;
+            margin: 0 0 25px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-fine);
         }
 
-        /* 預算管理區塊 */
-        .budget-section {
-            border: 1px solid var(--border-fine);
-            padding: 30px;
-            margin-bottom: 30px;
-            background-color: #ffffff;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .budget-header {
+        .week-control-bar {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 15px;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-md);
+            padding: 14px 20px;
+            margin-bottom: 25px;
+            font-size: 0.88rem;
+            font-weight: 600;
         }
 
-        .budget-header h3 {
-            margin: 0;
+        .section-box {
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .section-title {
             font-family: var(--font-serif);
-            font-size: 1.2rem;
+            font-size: 1.15rem;
+            margin-bottom: 18px;
             font-weight: 400;
         }
 
-        .budget-status {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .budget-bar-bg {
-            background-color: var(--bg-main);
-            height: 10px;
-            width: 100%;
-            border-radius: 5px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .budget-bar-fill {
-            background-color: var(--text-muted); 
-            height: 100%;
-            width: 0%;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .budget-alert {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 10px;
-            display: none;
-            font-weight: 600;
-        }
-
-        /* 圓餅圖區塊 */
-        .chart-section {
-            border: 1px solid var(--border-fine);
-            padding: 40px;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 340px;
-            height: 340px;
-        }
-
-        .no-data-msg {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            padding: 50px 0;
-            font-style: italic;
-        }
-
-        /* 雙欄並排架構 */
-        .page-split-grid {
+        .week-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            width: 100%;
-            box-sizing: border-box;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
         }
 
-        .form-container-box {
-            background: #ffffff;
+        .day-card {
+            background: var(--bg-card);
             border: 1px solid var(--border-fine);
-            padding: 40px;
-            box-sizing: border-box;
-        }
-
-        /* 歷史明細篩選面板 */
-        .filter-panel {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-fine);
-            padding: 24px;
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr) auto;
-            gap: 15px;
-            align-items: flex-end;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .filter-group {
+            border-radius: var(--radius-md);
+            padding: 12px;
+            min-height: 280px;
             display: flex;
             flex-direction: column;
         }
 
-        .filter-group label {
-            margin-bottom: 6px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        .filter-group input, .filter-group select {
-            padding: 8px 0;
-            font-size: 0.85rem;
-            background-color: transparent;
-        }
-
-        .btn-art {
-            background: none;
-            border: 1px solid var(--text-main);
-            color: var(--text-main);
-            padding: 10px 20px;
-            font-size: 0.75rem;
+        .day-header {
+            font-size: 0.82rem;
             font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
-        }
-        .btn-art:hover {
-            background-color: var(--text-main);
-            color: var(--bg-main);
-        }
-
-        .form-divider {
-            border: none;
-            border-top: 1px solid var(--border-fine);
-            margin: 35px 0 25px 0;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px 0;
-            border: none;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
             border-bottom: 1px solid var(--border-fine);
-            background: transparent;
-            box-sizing: border-box;
-            font-size: 0.95rem;
-            font-family: var(--font-sans);
-            color: var(--text-main);
-            border-radius: 0;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-bottom-color: var(--text-main);
-        }
-
-        button.submit-btn {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--text-main);
-            color: var(--bg-main);
-            border: none;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: opacity 0.2s ease;
-        }
-
-        button.submit-btn:hover {
-            opacity: 0.85;
-        }
-
-        /* 歷史明細清單 */
-        .transaction-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-        }
-
-        .transaction-item {
-            padding: 20px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-fine);
         }
 
-        .item-details {
+        .add-btn-icon {
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+
+        .add-btn-icon:hover {
+            background: var(--text-main);
+            color: var(--bg-main);
+        }
+
+        .day-schedule-list {
+            flex: 1;
             display: flex;
             flex-direction: column;
+            gap: 8px;
         }
 
-        .item-desc {
-            font-size: 1.05rem;
-        }
-
-        .item-sub {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .tag-badge {
-            display: inline-block;
-            background-color: var(--bg-card);
-            color: var(--accent-warm);
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            margin-left: 6px;
-            font-weight: 600;
-        }
-
-        .right-section {
+        .sch-item-card {
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            font-size: 0.78rem;
+            border-left: 4px solid var(--accent-warm);
+            position: relative;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .item-amount {
-            font-family: var(--font-serif);
-            font-size: 1.25rem;
-            margin-right: 25px;
+        .sch-header-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-right: 14px;
         }
 
-        .delete-btn {
+        .sch-tag {
+            font-weight: 600;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .sch-item-card .del-sch {
+            position: absolute;
+            top: 8px;
+            right: 8px;
             background: none;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 1.2rem;
-            padding: 5px 10px;
+            font-size: 0.75rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            line-height: 1;
         }
-        
-        .delete-btn:hover {
+        .sch-item-card .del-sch:hover {
             color: var(--accent-warning);
+            background: rgba(185, 28, 28, 0.08);
         }
 
-        .type-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            margin-right: 10px;
-            vertical-align: middle;
+        .sch-time {
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 2px 0;
         }
-        .dot-income { background-color: var(--accent-warm); }
-        .dot-expense { background-color: var(--text-muted); }
 
-        /* 週期性排程清單樣式 */
-        .routine-list {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0 0 0;
+        .sch-content {
+            color: var(--text-main);
+            word-break: break-word;
         }
-        .routine-item {
+
+        .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        select { 
+            width: 100%; 
+            padding: 10px 36px 10px 14px;
+            border: 1px solid var(--border-fine); 
+            border-radius: var(--radius-md);
+            background: var(--bg-main); 
+            font-size: 0.88rem; 
+            color: var(--text-main);
+            transition: border-color 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .custom-select-wrapper::after {
+            content: "▾";
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--border-fine); 
+            border-radius: var(--radius-md);
+            background: var(--bg-main); 
+            font-size: 0.88rem; 
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--text-main); }
+
+        .tag-manager-box {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px dashed var(--border-fine);
+        }
+        .tag-chip-list {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .tag-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-full);
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            display: flex;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px dashed var(--border-fine);
+            gap: 6px;
+        }
+        .tag-chip .del-tag {
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+        .tag-chip .del-tag:hover { color: var(--accent-warning); }
+
+        /* Todo APP 樣式 */
+        .todo-container { max-width: 800px; }
+        .todo-input-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .todo-top-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .todo-top-row input[type="text"] {
+            flex: 1;
+            border: 1px solid var(--border-fine);
+            background: var(--bg-window);
+        }
+        .todo-opt-btn {
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .todo-opt-btn:hover, .todo-opt-btn.active {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+        .todo-extra-panel {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-fine);
+        }
+        .todo-extra-panel.open { display: flex; }
+        .todo-time-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .todo-time-group input[type="time"] {
+            width: auto;
+            padding: 6px 10px;
+        }
+
+        .todo-add-btn {
+            background: var(--text-main);
+            color: var(--bg-main);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 10px 24px;
             font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            align-self: flex-end;
+        }
+        .todo-add-btn:hover { opacity: 0.9; }
+        
+        .todo-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+        .todo-item {
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .todo-item.clearing { opacity: 0; transform: translateX(20px); }
+        .todo-left { display: flex; align-items: flex-start; gap: 14px; flex: 1; }
+        .todo-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-fine);
+            border-radius: 50%;
+            cursor: pointer;
+            display: grid;
+            place-content: center;
+            transition: all 0.2s ease;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .todo-checkbox:hover { border-color: var(--text-main); }
+        .todo-checkbox:checked { background-color: var(--accent-warm); border-color: var(--accent-warm); }
+        .todo-checkbox:checked::before { content: "✓"; color: #fff; font-size: 0.75rem; font-weight: bold; }
+        .todo-body { display: flex; flex-direction: column; gap: 4px; }
+        .todo-text { font-size: 0.92rem; color: var(--text-main); font-weight: 500; }
+        .todo-time-tag { font-size: 0.75rem; color: var(--accent-warm); font-weight: 600; }
+        .todo-memo { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; word-break: break-word; }
+
+        /* Dashboard & Form */
+        .dashboard { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            background-color: var(--bg-card); 
+            border: 1px solid var(--border-fine); 
+            border-radius: var(--radius-lg);
+            margin-bottom: 25px; 
+            overflow: hidden;
+        }
+        .card { padding: 25px; border-right: 1px solid var(--border-fine); }
+        .card:last-child { border-right: none; }
+        .card h3 { margin: 0 0 8px 0; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .card p { margin: 0; font-size: 1.8rem; font-weight: 600; }
+        .page-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+        button.submit-btn { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: var(--text-main); 
+            color: var(--bg-main); 
+            border: none; 
+            border-radius: var(--radius-md);
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            transition: opacity 0.2s;
+        }
+        button.submit-btn:hover { opacity: 0.9; }
+
+        .transaction-item { 
+            padding: 14px 0; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--border-fine); 
+            font-size: 0.88rem; 
+        }
+        .chart-wrapper { position: relative; width: 100%; max-width: 300px; height: 300px; margin: 0 auto; }
+
+        .pomo-box { text-align: center; padding: 20px; }
+        .pomo-time { 
+            font-size: 4rem; 
+            font-weight: 600;
+            margin: 15px 0; 
+            letter-spacing: 2px;
+            color: var(--text-main);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-window);
+            border: 1px solid var(--border-fine);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* 時間選擇器 (Snap Points) */
+        .time-picker-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-fine);
+        }
+
+        .picker-column-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .picker-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .wheel-container {
+            position: relative;
+            height: 100px;
+            width: 100%;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            background: var(--bg-window);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-fine);
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+        .wheel-container::-webkit-scrollbar { display: none; }
+
+        .wheel-spacer { height: 35px; }
+
+        .wheel-item {
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-family: var(--font-num) !important;
+            transition: all 0.15s ease;
+            opacity: 0.35;
+            cursor: pointer;
+            user-select: none;
+            scroll-snap-align: center;
+        }
+
+        .wheel-item:hover { opacity: 0.7; }
+
+        .wheel-item.selected {
+            color: var(--text-main);
+            font-size: 1.25rem;
+            font-weight: 700;
+            opacity: 1;
+        }
+
+        .wheel-selection-highlight {
+            position: absolute;
+            top: 35px;
+            left: 0; right: 0;
+            height: 30px;
+            background: rgba(44, 40, 37, 0.05);
+            border-top: 1px solid rgba(44, 40, 37, 0.1);
+            border-bottom: 1px solid rgba(44, 40, 37, 0.1);
+            pointer-events: none;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
+<!-- 左側邊欄 Sidebar -->
 <div class="sidebar">
     <div class="brand-section">
-        <h1 id="ui-title">Studio Balance</h1>
-        <p id="ui-subtitle">Cloud Horizon Ledger</p>
+        <h1>Studio Balance</h1>
+        <p>Design Horizon & Planner</p>
+    </div>
+
+    <!-- Google 登入功能區塊 -->
+    <div class="auth-section">
+        <div id="g_id_onload"
+            data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse"
+            data-auto_prompt="false">
+        </div>
+        <div id="google-btn-container" class="g_id_signin" data-type="standard" data-size="medium" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
         
-        <div class="user-profile-box" id="auth-box">
-            <div class="user-info" id="user-info-ui" style="display: none;">
-                <img id="user-photo" class="user-avatar" src="" alt="Avatar">
-                <span id="user-display-name" class="user-name">Loading...</span>
+        <div id="user-profile-card" class="user-profile" style="display: none;">
+            <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+            <div class="user-info">
+                <div id="user-name" class="user-name"></div>
+                <div id="user-email" class="user-email"></div>
             </div>
-            <button id="auth-action-btn" class="auth-btn">Sign In With Google</button>
+            <button class="btn-logout" onclick="handleLogout()" title="登出">✕</button>
         </div>
     </div>
-    
+
     <ul class="nav-menu">
-        <li class="nav-item active" id="menu-dashboard">儀表板 / Dashboard</li>
-        <li class="nav-item" id="menu-entry">記帳與預算 / New Entry</li>
-        <li class="nav-item" id="menu-archive">歷史明細 / Archive</li>
+        <li class="nav-item active" id="accordion-life-toggle" onclick="toggleLifeAccordion()">
+            <span>🌿 <span data-i18n="navLife">生活規劃</span></span>
+            <span id="life-icon" style="font-size: 0.7rem;">▼</span>
+        </li>
+        <div class="sub-menu open" id="life-sub-menu">
+            <div class="sub-item active" id="menu-time" onclick="switchTab('time')" data-i18n="navTime">📅 時間管理</div>
+            <div class="sub-item" id="menu-todo" onclick="switchTab('todo')" data-i18n="navTodo">☑️ 待辦事項</div>
+            <div class="sub-item" id="menu-ticktick" onclick="switchTab('ticktick')" data-i18n="navFocus">⏱️ 專注番茄鐘</div>
+        </div>
+
+        <li class="nav-item" id="accordion-accounting-toggle" onclick="toggleAccountingAccordion()">
+            <span>💰 <span data-i18n="navLedger">記帳系統</span></span>
+            <span id="acc-icon" style="font-size: 0.7rem;">▶</span>
+        </li>
+        <div class="sub-menu" id="accounting-sub-menu">
+            <div class="sub-item" id="menu-dashboard" onclick="switchTab('dashboard')" data-i18n="navDashboard">📊 數據儀表板</div>
+            <div class="sub-item" id="menu-entry" onclick="switchTab('entry')" data-i18n="navEntry">📝 記帳與預算設定</div>
+            <div class="sub-item" id="menu-archive" onclick="switchTab('archive')" data-i18n="navArchive">📜 歷史紀錄歸檔</div>
+        </div>
     </ul>
 
     <div class="sidebar-footer">
-        <button class="btn-lang" id="lang-toggle">ZH / EN / JP</button>
+        <button class="btn-lang" id="lang-toggle" onclick="toggleLanguage()">Language: 中文</button>
     </div>
 </div>
 
+<!-- 右側主內容區 Main Content -->
 <div class="main-content">
 
-    <div id="unauthenticated-msg" class="cloud-placeholder">
-        Please sign in with Google to view and manage your ledger.
+    <!-- 1-1. 時間管理頁面 -->
+    <div id="page-time" class="tab-page active">
+        <h2 class="page-title" data-i18n="timeTitle">時間管理與規劃</h2>
+        
+        <div class="week-control-bar">
+            <span>🗓️ <span data-i18n="weekRange">本週檢視</span>：<strong class="num-font">2026/07/19 (日) — 2026/07/25 (六)</strong></span>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title" data-i18n="scheduleTitle">時段行程規劃</div>
+            <div class="week-grid" id="week-grid-container"></div>
+
+            <div class="tag-manager-box">
+                <label style="margin-bottom:8px;">🏷️ 自訂客製化標籤管理</label>
+                <div style="display:flex; gap:8px; max-width: 400px;">
+                    <input type="text" id="new-tag-input" placeholder="新增標籤名稱 (例如: 🎨 設計手帳)..." style="padding: 6px 12px; font-size: 0.8rem;">
+                    <button onclick="addCustomTag()" style="padding: 6px 16px; background:var(--text-main); color:var(--bg-main); border:none; border-radius:var(--radius-md); cursor:pointer; font-size:0.8rem; white-space:nowrap;">新增標籤</button>
+                </div>
+                <div class="tag-chip-list" id="tag-chip-container"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="authenticated-content-wrapper" style="display: none;">
+    <!-- 1-2. 獨立待辦事項頁面 -->
+    <div id="page-todo" class="tab-page">
+        <h2 class="page-title" data-i18n="todoTitle">待辦事項</h2>
+        <div class="section-box todo-container">
+            <form id="todo-form" class="todo-input-card">
+                <div class="todo-top-row">
+                    <input type="text" id="todo-input" placeholder="新增待辦事項 (例如：撰寫每週工作回報)..." required>
+                    <button type="button" class="todo-opt-btn" id="btn-toggle-extra" onclick="toggleTodoExtra()">⏰ 設定時間 / 備註</button>
+                </div>
+                
+                <div class="todo-extra-panel" id="todo-extra-panel">
+                    <div class="todo-time-group">
+                        <span>時間設定 (選填)：</span>
+                        <input type="time" id="todo-start-time" class="num-font">
+                        <span>至</span>
+                        <input type="time" id="todo-end-time" class="num-font">
+                    </div>
+                    <div>
+                        <label style="margin-bottom:4px;">備註說明 (選填)：</label>
+                        <input type="text" id="todo-memo-input" placeholder="輸入詳細說明、相關連結或備註...">
+                    </div>
+                </div>
+
+                <button type="submit" class="todo-add-btn" data-i18n="btnAddTodo">新增待辦事項</button>
+            </form>
+            <ul id="todo-list" class="todo-list"></ul>
+        </div>
+    </div>
+
+    <!-- 1-3. 專注番茄鐘頁面 -->
+    <div id="page-ticktick" class="tab-page">
+        <h2 class="page-title" data-i18n="focusTitle">專注番茄鐘</h2>
+        <div class="section-box pomo-box" style="max-width: 400px; margin: 0 auto;">
+            <div class="pomo-time" id="pomo-display">25:00</div>
+            <button class="submit-btn" id="pomo-start-btn" onclick="toggleTimer()" data-i18n="btnStartFocus">開始專注</button>
+        </div>
+    </div>
+
+    <!-- 2-1. 數據儀表板頁面 -->
+    <div id="page-dashboard" class="tab-page">
+        <h2 class="page-title" data-i18n="dashTitle">數據儀表板</h2>
         
-        <div id="page-dashboard" class="tab-page active">
-            <h2 class="page-title" id="ui-title-dashboard">Dashboard Overview</h2>
-            
-            <div class="main-calendar-box">
-                <div class="calendar-controls-left">
-                    <label for="main-date-view" id="ui-lbl-viewdate">Viewing Date:</label>
-                    <input type="date" id="main-date-view">
-                </div>
-                <div class="view-toggle-group">
-                    <button id="btn-view-day" class="view-btn active">單日 / Day</button>
-                    <button id="btn-view-month" class="view-btn">全月 / Month</button>
-                </div>
+        <div class="section-box" style="display:flex; justify-content:space-between; align-items:center; padding: 16px 24px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label for="main-date-view" id="lbl-date-view-type" style="margin:0;" data-i18n="lblViewDateDay">檢視日期：</label>
+                <input type="date" id="main-date-view" class="num-font" style="width:auto;" onchange="updateDashboard()">
             </div>
-
-            <div class="dashboard">
-                <div class="card">
-                    <h3 id="ui-net">資產淨值</h3>
-                    <p id="balance">$0.00</p>
-                </div>
-                <div class="card">
-                    <h3 id="ui-income">收入計</h3>
-                    <p id="income">$0.00</p>
-                </div>
-                <div class="card">
-                    <h3 id="ui-expense">支出計</h3>
-                    <p id="expense">$0.00</p>
-                </div>
-            </div>
-
-            <div class="budget-section">
-                <div class="budget-header">
-                    <h3 id="ui-budget-title">Monthly Budget Plan</h3>
-                    <div class="budget-status" id="budget-status">$0.00 / $0.00</div>
-                </div>
-                <div class="budget-bar-bg">
-                    <div class="budget-bar-fill" id="budget-bar-fill"></div>
-                </div>
-                <div class="budget-alert" id="budget-alert">Budget Limit Exceeded</div>
-            </div>
-
-            <div class="chart-section">
-                <div class="chart-wrapper" id="chart-wrapper">
-                    <canvas id="expenseChart"></canvas>
-                </div>
-                <div id="no-data-msg" class="no-data-msg" style="display: none;">No expense record found to visualize.</div>
+            <div style="display:flex; gap:8px;">
+                <button id="btn-view-day" onclick="setDashboardMode('day')" style="padding:6px 14px; border-radius:var(--radius-full); border:1px solid var(--text-main); background:var(--text-main); color:var(--bg-main); cursor:pointer; font-size:0.8rem;" data-i18n="btnDay">單日</button>
+                <button id="btn-view-month" onclick="setDashboardMode('month')" style="padding:6px 14px; border-radius:var(--radius-full); border:1px solid var(--border-fine); background:var(--bg-window); color:var(--text-main); cursor:pointer; font-size:0.8rem;" data-i18n="btnMonth">全月</button>
             </div>
         </div>
 
-        <div id="page-entry" class="tab-page">
-            <h2 class="page-title" id="ui-title-entry">Record & Schedule Plan</h2>
-            
-            <div class="page-split-grid">
-                <div class="form-container-box">
-                    <form id="bookkeeper-form">
-                        <div class="form-group">
-                            <label for="entry-date" id="ui-lbl-entry-date">Transaction Date</label>
-                            <input type="date" id="entry-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="type" id="ui-lbl-type">Registry Type</label>
-                            <select id="type">
-                                <option value="expense" id="ui-opt-expense">Outflow (Expense)</option>
-                                <option value="income" id="ui-opt-income">Inflow (Income)</option>
+        <div class="dashboard">
+            <div class="card"><h3 data-i18n="netBalance">資產淨值</h3><p id="balance">$0</p></div>
+            <div class="card"><h3 data-i18n="totalIncome">收入計</h3><p id="income">$0</p></div>
+            <div class="card"><h3 data-i18n="totalExpense">支出計</h3><p id="expense">$0</p></div>
+        </div>
+
+        <div class="section-box">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
+                <h3 data-i18n="budgetTitle" style="margin:0; font-family:var(--font-serif); font-weight:400;">月度預算規劃</h3>
+                <div id="budget-status" style="font-size:0.85rem; color:var(--text-muted);">$0 / $20,000</div>
+            </div>
+            <div style="background:var(--bg-main); height:10px; width:100%; border-radius:var(--radius-full); overflow:hidden;">
+                <div id="budget-bar-fill" style="background:var(--text-main); height:100%; width:0%; border-radius:var(--radius-full); transition:width 0.3s ease;"></div>
+            </div>
+            <div id="budget-alert" style="font-size:0.78rem; color:var(--accent-warning); margin-top:10px; display:none; font-weight:600;" data-i18n="budgetExceeded">⚠️ 已超出預算限額！</div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title" data-i18n="expenseAnalysis">支出類別分析</div>
+            <div class="chart-wrapper"><canvas id="expenseChart"></canvas></div>
+            <div id="no-data-msg" style="color:var(--text-muted); font-size:0.85rem; text-align:center; display:none; padding:20px;" data-i18n="noChartData">無相關支出紀錄</div>
+        </div>
+    </div>
+
+    <!-- 2-2. 記帳與預算排程頁面 -->
+    <div id="page-entry" class="tab-page">
+        <h2 class="page-title" data-i18n="entryTitle">記帳與預算設定</h2>
+        <div class="page-split-grid">
+            <div class="section-box">
+                <h3 style="font-family: var(--font-serif); font-weight:400; margin-top:0; margin-bottom:18px;">單筆記帳紀錄</h3>
+                <form id="bookkeeper-form">
+                    <div class="form-group">
+                        <label data-i18n="lblTransDate">交易日期</label>
+                        <input type="date" id="entry-date" class="num-font" value="2026-07-23" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblType">收支類別</label>
+                        <div class="custom-select-wrapper">
+                            <select id="type" onchange="populateCategories()">
+                                <option value="expense" data-i18n="optExpense">支出</option>
+                                <option value="income" data-i18n="optIncome">收入</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="category" id="ui-lbl-category">Classification</label>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblCategory">分類</label>
+                        <div class="custom-select-wrapper">
                             <select id="category"></select>
                         </div>
-                        <div class="form-group">
-                            <label for="description" id="ui-lbl-desc">Manifest / Memo (Optional)</label>
-                            <input type="text" id="description" placeholder="...">
-                        </div>
-                        <div class="form-group">
-                            <label for="entry-tags" id="ui-lbl-tags">Tags (Optional, space separated)</label>
-                            <input type="text" id="entry-tags">
-                        </div>
-                        <div class="form-group">
-                            <label for="amount" id="ui-lbl-amount">Amount ($)</label>
-                            <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
-                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblMemo">備註 / 說明 (選填)</label>
+                        <input type="text" id="description" placeholder="（可留空，預設帶入分類名稱）">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblAmount">金額 ($)</label>
+                        <input type="number" id="amount" class="num-font" step="any" min="0.01" placeholder="0" required>
+                    </div>
+                    <button type="submit" class="submit-btn" data-i18n="btnRecord">新增記帳紀錄</button>
+                </form>
+            </div>
 
-                        <button type="submit" class="submit-btn" id="ui-btn-submit">Record Entry</button>
-                        
-                        <hr class="form-divider">
-                        
-                        <div class="form-group">
-                            <label for="budget-input" id="ui-lbl-budget-setting">Adjust Monthly Budget ($)</label>
-                            <input type="number" id="budget-input" step="1" min="0" placeholder="20000">
-                        </div>
-                        <button type="button" class="submit-btn" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-fine); margin-top:0;" id="ui-btn-budget-update">Update Budget</button>
-                    </form>
-                </div>
-
-                <div class="form-container-box">
-                    <h3 style="font-family: var(--font-serif); font-weight:400; margin-top:0;" id="ui-title-routine">固定收入、支出週期自動記帳</h3>
-                    <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;" id="ui-desc-routine">設定固定開銷或收入（如房租、薪資、訂閱費），每次打開系統時會自動檢查並補登入。</p>
-                    
-                    <form id="routine-form">
-                        <div class="form-group">
-                            <label for="routine-type" id="ui-lbl-r-type">Type</label>
+            <div class="section-box">
+                <h3 style="font-family: var(--font-serif); font-weight:400; margin-top:0;" data-i18n="routineTitle">固定收支自動排程</h3>
+                <form id="routine-form">
+                    <div class="form-group">
+                        <label data-i18n="lblType">收支類別</label>
+                        <div class="custom-select-wrapper">
                             <select id="routine-type">
-                                <option value="expense" id="ui-opt-r-expense">支出 (Expense)</option>
-                                <option value="income" id="ui-opt-r-income">收入 (Income)</option>
+                                <option value="expense" data-i18n="optExpense">支出</option>
+                                <option value="income" data-i18n="optIncome">收入</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="routine-period" id="ui-lbl-r-period">Frequency</label>
-                            <select id="routine-period">
-                                <option value="monthly" id="ui-opt-r-monthly">每月固定日期 (Monthly)</option>
-                                <option value="weekly" id="ui-opt-r-weekly">每週固定星期幾 (Weekly)</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="group-routine-day">
-                            <label for="routine-day" id="ui-lbl-r-day">每月固定扣款、收入日 (1-31號)</label>
-                            <input type="number" id="routine-day" min="1" max="31" placeholder="10">
-                        </div>
-                        <div class="form-group" id="group-routine-weekday" style="display:none;">
-                            <label for="routine-weekday" id="ui-lbl-r-weekday">每週固定扣款日</label>
-                            <select id="routine-weekday">
-                                <option value="1" id="ui-opt-w-1">星期一 (Monday)</option>
-                                <option value="2" id="ui-opt-w-2">星期二 (Tuesday)</option>
-                                <option value="3" id="ui-opt-w-3">星期三 (Wednesday)</option>
-                                <option value="4" id="ui-opt-w-4">星期四 (Thursday)</option>
-                                <option value="5" id="ui-opt-w-5">星期五 (Friday)</option>
-                                <option value="6" id="ui-opt-w-6">星期六 (Saturday)</option>
-                                <option value="0" id="ui-opt-w-0">星期日 (Sunday)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="routine-desc" id="ui-lbl-r-desc">項目名稱/備註 (選填)</label>
-                            <input type="text" id="routine-desc">
-                        </div>
-                        <div class="form-group">
-                            <label for="routine-amount" id="ui-lbl-r-amount">Amount ($)</label>
-                            <input type="number" id="routine-amount" step="0.01" min="0.01" placeholder="0.00" required>
-                        </div>
-                        <button type="submit" class="submit-btn" style="background-color: var(--bg-card); color:var(--text-main); border:1px solid var(--text-main)" id="ui-btn-r-submit">Add Recurring Task</button>
-                    </form>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblRoutineDesc">項目名稱 / 備註</label>
+                        <input type="text" id="routine-desc" placeholder="例如：月租金、薪水收入、訂閱費" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblAmount">金額 ($)</label>
+                        <input type="number" id="routine-amount" class="num-font" step="any" min="0.01" placeholder="0" required>
+                    </div>
+                    <button type="submit" class="submit-btn" style="background-color: var(--bg-card); color:var(--text-main); border:1px solid var(--border-fine)" data-i18n="btnAddRoutine">新增週期排程</button>
+                </form>
 
-                    <hr class="form-divider">
-                    <ul class="routine-list" id="routine-list"></ul>
+                <div class="tag-manager-box">
+                    <label style="margin-bottom:8px;">🏷️ 自訂收支分類管理</label>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <input type="text" id="new-cat-input" placeholder="輸入新增分類名稱..." style="padding: 6px 12px; font-size: 0.8rem;">
+                        <button onclick="addCustomCategory()" style="padding: 6px 16px; background:var(--text-main); color:var(--bg-main); border:none; border-radius:var(--radius-md); cursor:pointer; font-size:0.8rem; white-space:nowrap;">新增分類</button>
+                    </div>
+                    <div class="tag-chip-list" id="cat-chip-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2-3. 歷史紀錄歸檔頁面 -->
+    <div id="page-archive" class="tab-page">
+        <h2 class="page-title" data-i18n="archiveTitle">歷史紀錄歸檔</h2>
+        <div class="section-box" style="display:flex; gap:15px; margin-bottom:20px; padding: 16px 24px;">
+            <input type="date" id="filter-date" class="num-font" onchange="renderArchiveList()" style="width: auto;">
+            <div class="custom-select-wrapper" style="width:auto;">
+                <select id="filter-category" onchange="renderArchiveList()">
+                    <option value="ALL">全部分類</option>
+                </select>
+            </div>
+            <input type="text" id="filter-keyword" oninput="renderArchiveList()" placeholder="搜尋備註..." style="flex:1;">
+        </div>
+        <div class="section-box">
+            <ul id="transaction-list" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- 新增行程彈窗 Modal -->
+<div class="modal-overlay" id="sch-modal">
+    <div class="modal-box">
+        <h3 style="font-family: var(--font-serif); margin-top:0;" data-i18n="modalTitle">新增時段行程</h3>
+        <p id="modal-date-label" class="num-font" style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 20px;"></p>
+        
+        <div class="form-group">
+            <label data-i18n="lblTag">選擇客製化標籤</label>
+            <div class="custom-select-wrapper">
+                <select id="modal-tag"></select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label data-i18n="lblTimeSlot">時段設定 (刻度滾動卡頓對齊)</label>
+            <div class="time-picker-container">
+                <div class="picker-column-group">
+                    <span class="picker-label">開始時間</span>
+                    <div style="display:flex; gap:4px; width:100%;">
+                        <div class="wheel-container" id="wheel-start-hour" onscroll="onWheelScroll('wheel-start-hour')">
+                            <div class="wheel-selection-highlight"></div>
+                            <div class="wheel-spacer"></div>
+                            <div class="wheel-spacer"></div>
+                        </div>
+                        <div class="wheel-container" id="wheel-start-min" onscroll="onWheelScroll('wheel-start-min')">
+                            <div class="wheel-selection-highlight"></div>
+                            <div class="wheel-spacer"></div>
+                            <div class="wheel-spacer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <span style="font-size:1.2rem; color:var(--text-muted); margin-top:18px;">至</span>
+
+                <div class="picker-column-group">
+                    <span class="picker-label">結束時間</span>
+                    <div style="display:flex; gap:4px; width:100%;">
+                        <div class="wheel-container" id="wheel-end-hour" onscroll="onWheelScroll('wheel-end-hour')">
+                            <div class="wheel-selection-highlight"></div>
+                            <div class="wheel-spacer"></div>
+                            <div class="wheel-spacer"></div>
+                        </div>
+                        <div class="wheel-container" id="wheel-end-min" onscroll="onWheelScroll('wheel-end-min')">
+                            <div class="wheel-selection-highlight"></div>
+                            <div class="wheel-spacer"></div>
+                            <div class="wheel-spacer"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="page-archive" class="tab-page">
-            <h2 class="page-title" id="ui-title-archive">Archive Index</h2>
-            
-            <div class="filter-panel">
-                <div class="filter-group">
-                    <label id="ui-lbl-filter-date">Filter by Date</label>
-                    <input type="date" id="filter-date">
-                </div>
-                <div class="filter-group">
-                    <label id="ui-lbl-filter-cat">Filter by Category</label>
-                    <select id="filter-category"></select>
-                </div>
-                <div class="filter-group">
-                    <label id="ui-lbl-filter-name">Search Name/Memo</label>
-                    <input type="text" id="filter-keyword" placeholder="...">
-                </div>
-                <div class="filter-group">
-                    <label id="ui-lbl-filter-tags">Search Tags</label>
-                    <input type="text" id="filter-tags">
-                </div>
-                <button class="btn-art" id="ui-btn-clear-filter">Reset</button>
-            </div>
-
-            <ul class="transaction-list" id="transaction-list"></ul>
+        <div class="form-group">
+            <label data-i18n="lblContent">行程內容</label>
+            <input type="text" id="modal-content" placeholder="輸入行程內容..." required>
         </div>
-
+        
+        <div style="display:flex; gap:10px; margin-top:24px;">
+            <button class="submit-btn" onclick="saveModalSchedule()" data-i18n="btnSave">儲存</button>
+            <button class="submit-btn" onclick="closeModal()" style="background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-fine);" data-i18n="btnCancel">取消</button>
+        </div>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script>
+    // --- Google 登入邏輯 ---
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
 
-    // 💡 注意：請將此處替換為你剛才找到的真實 Firebase 設定！
-    const firebaseConfig = {
-        apiKey: "AIzaSyBuv9703YYLkhBRMylEIyhH0P1148h0QqQ",
-        authDomain: "bookkeeping-6105c.firebaseapp.com",
-        projectId: "bookkeeping-6105c",
-        storageBucket: "bookkeeping-6105c.firebasestorage.app",
-        messagingSenderId: "126184617636",          
-        appId: "1:126184617636:web:7b0bd61aa1ef04c314d831"
-    };
+    function handleCredentialResponse(response) {
+        const responsePayload = parseJwt(response.credential);
+        if (responsePayload) {
+            const user = {
+                name: responsePayload.name,
+                email: responsePayload.email,
+                picture: responsePayload.picture
+            };
+            localStorage.setItem('sb_google_user', JSON.stringify(user));
+            renderUserProfile(user);
+        }
+    }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+    function renderUserProfile(user) {
+        if (user) {
+            document.getElementById('google-btn-container').style.display = 'none';
+            document.getElementById('user-profile-card').style.display = 'flex';
+            document.getElementById('user-avatar').src = user.picture;
+            document.getElementById('user-name').innerText = user.name;
+            document.getElementById('user-email').innerText = user.email;
+        } else {
+            document.getElementById('google-btn-container').style.display = 'block';
+            document.getElementById('user-profile-card').style.display = 'none';
+        }
+    }
 
-    const i18n = {
-        en: {
-            title: "Studio Balance", subtitle: "Cloud Horizon Ledger",
-            menuDashboard: "Dashboard Overview", menuEntry: "Record & Schedule", menuArchive: "Archive Index",
-            viewDate: "Viewing Date:", btnViewDay: "Day", btnViewMonth: "Month",
-            netDay: "Daily Net Value", incomeDay: "Daily Inflow", expenseDay: "Daily Outflow",
-            netMonth: "Monthly Net Value", incomeMonth: "Monthly Inflow", expenseMonth: "Monthly Outflow",
-            lblEntryDate: "Transaction Date", lblType: "Registry Type", lblCategory: "Classification",
-            lblDesc: "Manifest / Memo (Optional)", lblTags: "Tags (Optional, space separated)", lblAmount: "Amount ($)",
-            optExpense: "Outflow (Expense)", optIncome: "Inflow (Income)", btnSubmit: "Record Entry",
-            budgetTitle: "Monthly Budget Plan", lblBudgetSetting: "Adjust Monthly Budget ($)", btnBudgetUpdate: "Update Budget Plan",
-            alertWarning: "Warning: Budget Level at (70%+)", alertExceeded: "Alert: Budget Limit Exceeded!",
-            lblFilterDate: "Filter by Date", lblFilterCat: "Filter by Category", lblFilterName: "Search Name/Memo", lblFilterTags: "Filter by Tag",
-            btnClearFilter: "Reset", allCategories: "— All Categories —",
-            titleRoutine: "Recurring Income & Expense Auto-Ledger", descRoutine: "Set up fix-pattern income/bills to auto-post safely upon cloud account check-in.",
-            lblRType: "Type", lblRPeriod: "Frequency", lblRDay: "Monthly Fix Day (1-31)", lblRWeekday: "Weekly Fix Day",
-            lblRDesc: "Name / Memo (Optional)", lblRAmount: "Amount ($)", btnRSubmit: "Add Recurring Task",
-            noData: "No expense record found to visualize.", placeholderTags: "e.g., #birthday #travel", placeholderRDesc: "If blank, system auto-fills category name",
-            unnamed: "Unnamed", periodMonthly: "Day", periodWeekly: "Every", loginText: "Sign In With Google", logoutText: "Sign Out",
-            loadingTxt: "Synchronizing cloud data...", unauthTxt: "Please sign in with Google to view and manage your ledger.",
-            weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            categories: {
-                expense: ['Food & Dining', 'Transportation', 'Curated & Shopping', 'Arts & Leisure', 'Utilities', 'Living Spaces', 'Uncategorized'],
-                income: ['Salaries', 'Freelance Projects', 'Royalties', 'Grants / Gifts', 'Dividends']
-            }
-        },
+    function handleLogout() {
+        localStorage.removeItem('sb_google_user');
+        renderUserProfile(null);
+    }
+
+    function checkSavedUser() {
+        const savedUser = JSON.parse(localStorage.getItem('sb_google_user'));
+        if (savedUser) {
+            renderUserProfile(savedUser);
+        }
+    }
+
+    // --- 金額格式化 ---
+    function formatAmount(num) {
+        if (num % 1 === 0) {
+            return num.toLocaleString('en-US');
+        }
+        return num.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+    }
+
+    // --- 1. 多國語言 ---
+    let currentLangIndex = 0;
+    const languages = ['zh', 'en', 'jp'];
+
+    const i18nData = {
         zh: {
-            title: "Studio Balance", subtitle: "雲端美學記帳平台",
-            menuDashboard: "數據主控台", menuEntry: "記帳與自動排程", menuArchive: "歷史明細歸檔",
-            viewDate: "當前檢視日期:", btnViewDay: "單日 / Day", btnViewMonth: "全月 / Month",
-            netDay: "當日資產淨值", incomeDay: "當日收入計", expenseDay: "當日支出計",
-            netMonth: "當月資產淨值", incomeMonth: "當月收入計", expenseMonth: "當月支出計",
-            lblEntryDate: "消費日期", lblType: "帳目類型", lblCategory: "項目項目分類",
-            lblDesc: "消費備註 / 名稱 (選填)", lblTags: "專案活動標籤 (選填，多個請用空格隔開)", lblAmount: "金額 ($)",
-            optExpense: "支出 (Outflow)", optIncome: "收入 (Inflow)", btnSubmit: "確認儲存帳目",
-            budgetTitle: "本月預算控制進度", lblBudgetSetting: "修改每月預算上限 ($)", btnBudgetUpdate: "更新預算額度",
-            alertWarning: "提醒：支出已達預算 70%，請克制消費", alertExceeded: "超支警告：目前消費已超出預算額度！",
-            lblFilterDate: "按日期篩選", lblFilterCat: "按分類查詢", lblFilterName: "搜尋名稱/備註", lblFilterTags: "搜尋指定標籤",
-            btnClearFilter: "重置條件", allCategories: "— 全部項目分類 —",
-            titleRoutine: "固定收入、支出週期自動記帳", descRoutine: "可在此設定固定的開銷或固定收入。每次您登入雲端帳戶時，系統會自動在雲端核對補登，無需手動重複填寫。",
-            lblRType: "收支類型", lblRPeriod: "循環週期", lblRDay: "每月固定扣款、收入日 (1-31號)", lblRWeekday: "每週固定扣款、收入日",
-            lblRDesc: "項目名稱/備註 (選填)", lblRAmount: "固定收支金額 ($)", btnRSubmit: "新增此週期排程",
-            noData: "無支出數據可供視覺化圖表分析。", placeholderTags: "例如：#生日聚餐 #日本行", placeholderRDesc: "若未填寫，系統將代入分類名稱",
-            unnamed: "未命名", periodMonthly: "每個月位在", periodWeekly: "每週固定在禮拜", loginText: "使用 Google 帳戶登入", logoutText: "登出帳戶",
-            loadingTxt: "正在同步雲端資料庫...", unauthTxt: "您目前尚未登入。請使用 Google 帳戶登入以存取與歸檔您的個人記帳紀錄。",
-            weekdays: ["日", "一", "二", "三", "四", "五", "六"],
-            categories: {
-                expense: ['餐飲飲食', '交通出行', '日常購物', '休閒娛樂', '水電雜費', '房租居住', '其他支出'],
-                income: ['薪水收入', '外快兼職', '獎金福利', '紅包收到', '投資收益']
-            }
+            langBtn: "Language: 中文",
+            navLife: "生活規劃", navTime: "📅 時間管理", navTodo: "☑️ 待辦事項", navFocus: "⏱️ 專注番茄鐘",
+            navLedger: "記帳系統", navDashboard: "📊 數據儀表板", navEntry: "📝 記帳與預算設定", navArchive: "📜 歷史紀錄歸檔",
+            timeTitle: "時間管理與規劃", weekRange: "本週檢視", scheduleTitle: "時段行程規劃", todoTitle: "待辦事項", btnAddTodo: "新增待辦事項",
+            dashTitle: "數據儀表板", lblViewDateDay: "檢視日期：", lblViewDateMonth: "檢視月份：", btnDay: "單日", btnMonth: "全月", netBalance: "資產淨值", totalIncome: "收入計", totalExpense: "支出計",
+            budgetTitle: "月度預算規劃", budgetExceeded: "⚠️ 已超出預算限額！", expenseAnalysis: "支出類別分析", noChartData: "無相關支出紀錄",
+            entryTitle: "記帳與預算設定", lblTransDate: "交易日期", lblType: "收支類別", optExpense: "支出", optIncome: "收入", lblCategory: "分類", lblMemo: "備註 / 說明 (選填)", lblAmount: "金額 ($)", btnRecord: "新增記帳紀錄",
+            routineTitle: "固定收支自動排程", lblRoutineDesc: "項目名稱 / 備註", btnAddRoutine: "新增週期排程",
+            archiveTitle: "歷史紀錄歸檔", focusTitle: "專注番茄鐘", btnStartFocus: "開始專注", btnPauseFocus: "暫停專注",
+            modalTitle: "新增時段行程", lblTag: "選擇客製化標籤", lblTimeSlot: "時段設定 (刻度滾動卡頓對齊)", lblContent: "行程內容", btnSave: "儲存", btnCancel: "取消"
+        },
+        en: {
+            langBtn: "Language: English",
+            navLife: "Life Planner", navTime: "📅 Time Planner", navTodo: "☑️ To-Do List", navFocus: "⏱️ Focus Timer",
+            navLedger: "Ledger System", navDashboard: "📊 Dashboard", navEntry: "📝 Record & Budget", navArchive: "📜 Archive Index",
+            timeTitle: "Time Management & Planner", weekRange: "Weekly View", scheduleTitle: "Scheduled Activities", todoTitle: "To-Do List", btnAddTodo: "Add Todo",
+            dashTitle: "Dashboard Overview", lblViewDateDay: "View Date:", lblViewDateMonth: "View Month:", btnDay: "Day", btnMonth: "Month", netBalance: "Net Balance", totalIncome: "Total Income", totalExpense: "Total Expense",
+            budgetTitle: "Monthly Budget Plan", budgetExceeded: "⚠️ Budget Exceeded!", expenseAnalysis: "Expense Analysis", noChartData: "No expense data found",
+            entryTitle: "Ledger Entry & Budget", lblTransDate: "Transaction Date", lblType: "Type", optExpense: "Expense", optIncome: "Income", lblCategory: "Classification", lblMemo: "Manifest / Memo (Optional)", lblAmount: "Amount ($)", btnRecord: "Record Entry",
+            routineTitle: "Recurring Schedule", lblRoutineDesc: "Item Description", btnAddRoutine: "Add Routine",
+            archiveTitle: "Archive Index", focusTitle: "Focus Pomodoro", btnStartFocus: "Start Focus", btnPauseFocus: "Pause",
+            modalTitle: "Add Schedule Slot", lblTag: "Custom Tag", lblTimeSlot: "Time Slot", lblContent: "Content", btnSave: "Save", btnCancel: "Cancel"
         },
         jp: {
-            title: "Studio Balance", subtitle: "クラウド美学家計簿",
-            menuDashboard: "ダッシュボード", menuEntry: "記帳と自動スケジューラ", menuArchive: "履歴アーカイブ",
-            viewDate: "閲覧日:", btnViewDay: "日", btnViewMonth: "月",
-            netDay: "当日の純資産", incomeDay: "当日の収入高", expenseDay: "当日の支出高",
-            netMonth: "今月の純資産", incomeMonth: "今月の収入高", expenseMonth: "今月の支出高",
-            lblEntryDate: "取引日", lblType: "勘定科目タイプ", lblCategory: "項目分類",
-            lblDesc: "摘要・メモ (任意)", lblTags: "タグ (任意、スペース区切り)", lblAmount: "金額 ($)",
-            optExpense: "支出 (Outflow)", optIncome: "収入 (Inflow)", btnSubmit: "エントリーを記録",
-            budgetTitle: "今月の予算管理の進捗", lblBudgetSetting: "毎月の予算上限を調整 ($)", btnBudgetUpdate: "予算設定を更新",
-            alertWarning: "警告：支出が予算の70％に達しました！", alertExceeded: "赤字警告：予算限度額を超過しています！",
-            lblFilterDate: "日付でフィルター", lblFilterCat: "カテゴリーで探す", lblFilterName: "キーワード検索", lblFilterTags: "タグで検索",
-            btnClearFilter: "条件リセット", allCategories: "— 全てのカテゴリー —",
-            titleRoutine: "固定収支の定期自動記録", descRoutine: "家賃、給与、サブスクなどの定期的な固定収支を設定します。ログインすると自動的に同期され、手動の再入力を省きます。",
-            lblRType: "収支タイプ", lblRPeriod: "繰り返し周期", lblRDay: "毎月の固定日 (1-31日)", lblRWeekday: "毎週の固定曜日",
-            lblRDesc: "項目名 / メモ (任意)", lblRAmount: "固定金額 ($)", btnRSubmit: "定期タスクを追加",
-            noData: "可視化できる支出データが見つかりません。", placeholderTags: "例：#誕生日 #旅行", placeholderRDesc: "空欄の場合、自動的にカテゴリー名が代入されます",
-            unnamed: "未命名", periodMonthly: "毎月", periodWeekly: "毎週", loginText: "Googleでログイン", logoutText: "ログアウト",
-            loadingTxt: "クラウドデータを同期中...", unauthTxt: "現在ログアウト状態です。Googleアカウントでログインして、家計簿を管理してください。",
-            weekdays: ["日", "月", "火", "水", "木", "金", "土"],
-            categories: {
-                expense: ['食費・外食', '交通費', '買い物・衣服', 'エンタメ・余暇', '水道光熱費', '家賃・住居', 'その他の支出'],
-                income: ['給与収入', '副業・フリーランス', 'ボーナス', 'お祝い金', '投資収益']
-            }
+            langBtn: "Language: 日本語",
+            navLife: "生活プランナー", navTime: "📅 時間管理", navTodo: "☑️ ToDoリスト", navFocus: "⏱️ 集中タイマー",
+            navLedger: "家計簿システム", navDashboard: "📊 ダッシュボード", navEntry: "📝 記帳と予算設定", navArchive: "📜 履歴アーカイブ",
+            timeTitle: "時間管理とスケジュール", weekRange: "今週の表示", scheduleTitle: "タイムスケジュール", todoTitle: "ToDoリスト", btnAddTodo: "タスク追加",
+            dashTitle: "ダッシュボード", lblViewDateDay: "表示日：", lblViewDateMonth: "表示月：", btnDay: "日別", btnMonth: "月別", netBalance: "純資産", totalIncome: "収入計", totalExpense: "支出計",
+            budgetTitle: "月間予算計画", budgetExceeded: "⚠️ 予算を超過しました！", expenseAnalysis: "支出分類分析", noChartData: "支出データはありません",
+            entryTitle: "記帳と予算設定", lblTransDate: "取引日", lblType: "収支種類", optExpense: "支出", optIncome: "収入", lblCategory: "分類", lblMemo: "メモ (任意)", lblAmount: "金額 ($)", btnRecord: "記録を保存",
+            routineTitle: "固定収支スケジュール", lblRoutineDesc: "項目名 / メモ", btnAddRoutine: "定期追加",
+            archiveTitle: "履歴アーカイブ", focusTitle: "集中ポモドーロ", btnStartFocus: "集中開始", btnPauseFocus: "一時停止",
+            modalTitle: "予定の追加", lblTag: "カスタムタグ", lblTimeSlot: "時間設定", lblContent: "予定内容", btnSave: "保存", btnCancel: "キャンセル"
         }
     };
 
-    let currentUser = null;
-    let currentLang = localStorage.getItem('art_lang') || 'zh';
-    let currentViewDimension = 'day';
-    let myChart = null;
+    function toggleLanguage() {
+        currentLangIndex = (currentLangIndex + 1) % languages.length;
+        const langKey = languages[currentLangIndex];
+        const data = i18nData[langKey];
 
-    let transactions = [];
-    let monthlyBudget = 20000;
-    let routines = [];
-    let routineLogs = [];
+        document.getElementById('lang-toggle').innerText = data.langBtn;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (data[key]) el.innerText = data[key];
+        });
+    }
 
-    const form = document.getElementById('bookkeeper-form');
-    const mainDateView = document.getElementById('main-date-view');
-    const entryDateInput = document.getElementById('entry-date');
-    const typeSelect = document.getElementById('type');
-    const categorySelect = document.getElementById('category');
-    const descriptionInput = document.getElementById('description');
-    const tagsInput = document.getElementById('entry-tags');
-    const amountInput = document.getElementById('amount');
-    const budgetInput = document.getElementById('budget-input');
-    const list = document.getElementById('transaction-list');
-    const filterDate = document.getElementById('filter-date');
-    const filterCategory = document.getElementById('filter-category');
-    const filterKeyword = document.getElementById('filter-keyword');
-    const filterTags = document.getElementById('filter-tags');
+    // --- 2. 側邊欄選單 ---
+    function toggleLifeAccordion() {
+        const subMenu = document.getElementById('life-sub-menu');
+        const icon = document.getElementById('life-icon');
+        if (subMenu.classList.contains('open')) {
+            subMenu.classList.remove('open');
+            icon.innerText = '▶';
+        } else {
+            subMenu.classList.add('open');
+            icon.innerText = '▼';
+        }
+    }
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    mainDateView.value = todayStr;
-    entryDateInput.value = todayStr;
+    function toggleAccountingAccordion() {
+        const subMenu = document.getElementById('accounting-sub-menu');
+        const icon = document.getElementById('acc-icon');
+        if (subMenu.classList.contains('open')) {
+            subMenu.classList.remove('open');
+            icon.innerText = '▶';
+        } else {
+            subMenu.classList.add('open');
+            icon.innerText = '▼';
+        }
+    }
 
     function switchTab(tabId) {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.getElementById(`menu-${tabId}`).classList.add('active');
-        document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
-        document.getElementById(`page-${tabId}`).classList.add('active');
+        document.querySelectorAll('.sub-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
 
-        if (tabId === 'entry') entryDateInput.value = mainDateView.value;
-        if (tabId === 'dashboard') setTimeout(updateUI, 50);
+        const targetPage = document.getElementById(`page-${tabId}`);
+        if (targetPage) targetPage.classList.add('active');
+
+        const targetMenu = document.getElementById(`menu-${tabId}`);
+        if (targetMenu) targetMenu.classList.add('active');
+
+        if (tabId === 'dashboard') updateDashboard();
+        if (tabId === 'archive') renderArchiveList();
     }
 
-    function toggleLanguage() {
-        const order = ['zh', 'en', 'jp'];
-        currentLang = order[(order.indexOf(currentLang) + 1) % order.length];
-        localStorage.setItem('art_lang', currentLang);
-        applyLanguageStrings();
+    // --- 3. 標籤管理 ---
+    let customTags = JSON.parse(localStorage.getItem('sb_custom_tags')) || [];
+
+    function renderTagManager() {
+        const chipContainer = document.getElementById('tag-chip-container');
+        const selectTag = document.getElementById('modal-tag');
+
+        chipContainer.innerHTML = '';
+        selectTag.innerHTML = '<option value="">（不使用標籤）</option>';
+
+        customTags.forEach((t, idx) => {
+            const chip = document.createElement('div');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `<span>${t}</span><span class="del-tag" onclick="removeCustomTag(${idx})">✕</span>`;
+            chipContainer.appendChild(chip);
+
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.innerText = t;
+            selectTag.appendChild(opt);
+        });
+
+        if (customTags.length === 0) {
+            chipContainer.innerHTML = '<span style="font-size:0.75rem; color:var(--text-muted);">尚未新增任何自訂標籤</span>';
+        }
     }
 
-    function setViewDimension(dimension) {
-        currentViewDimension = dimension;
-        document.getElementById('btn-view-day').classList.toggle('active', dimension === 'day');
-        document.getElementById('btn-view-month').classList.toggle('active', dimension === 'month');
-        updateUI();
+    function addCustomTag() {
+        const input = document.getElementById('new-tag-input');
+        const val = input.value.trim();
+        if (val && !customTags.includes(val)) {
+            customTags.push(val);
+            localStorage.setItem('sb_custom_tags', JSON.stringify(customTags));
+            input.value = '';
+            renderTagManager();
+        }
     }
 
-    function clearFilters() {
-        filterDate.value = '';
-        filterCategory.value = 'all';
-        filterKeyword.value = '';
-        filterTags.value = '';
-        updateUI();
+    function removeCustomTag(idx) {
+        customTags.splice(idx, 1);
+        localStorage.setItem('sb_custom_tags', JSON.stringify(customTags));
+        renderTagManager();
     }
 
-    function toggleRoutinePeriodInputs() {
-        const period = document.getElementById('routine-period').value;
-        document.getElementById('group-routine-day').style.display = period === 'monthly' ? 'block' : 'none';
-        document.getElementById('group-routine-weekday').style.display = period === 'weekly' ? 'block' : 'none';
-    }
+    // --- 4. 時間管理 ---
+    const weekDays = [
+        { date: '2026-07-19', label: '7/19 (日)' },
+        { date: '2026-07-20', label: '7/20 (一)' },
+        { date: '2026-07-21', label: '7/21 (二)' },
+        { date: '2026-07-22', label: '7/22 (三)' },
+        { date: '2026-07-23', label: '7/23 (四)' },
+        { date: '2026-07-24', label: '7/24 (五)' },
+        { date: '2026-07-25', label: '7/25 (六)' }
+    ];
 
-    function handleAuthAction() {
-        if (currentUser) {
-            signOut(auth).catch(err => console.error("Logout Error:", err));
-        } else {
-            signInWithPopup(auth, provider).catch(err => {
-                console.error("Firebase Auth Error:", err);
-                alert("登入失敗: " + err.message);
+    let schedules = JSON.parse(localStorage.getItem('sb_schedules')) || [];
+    let selectedDateForModal = '';
+
+    function renderWeekBoard() {
+        const container = document.getElementById('week-grid-container');
+        container.innerHTML = '';
+
+        weekDays.forEach(day => {
+            const card = document.createElement('div');
+            card.className = 'day-card';
+
+            const daySchedules = schedules.filter(s => s.date === day.date);
+            let itemsHtml = '';
+            
+            daySchedules.forEach(s => {
+                const tagDisplay = s.tag ? `<div class="sch-tag">${s.tag}</div>` : '';
+                itemsHtml += `
+                    <div class="sch-item-card">
+                        <button class="del-sch" onclick="deleteSchedule(${s.id})">✕</button>
+                        <div class="sch-header-line">${tagDisplay}</div>
+                        <div class="sch-time">${s.time}</div>
+                        <div class="sch-content">${s.content}</div>
+                    </div>
+                `;
             });
-        }
-    }
 
-    onAuthStateChanged(auth, async (user) => {
-        const authActionBtn = document.getElementById('auth-action-btn');
-        const userInfoUi = document.getElementById('user-info-ui');
-        const unauthMsg = document.getElementById('unauthenticated-msg');
-        const authContent = document.getElementById('authenticated-content-wrapper');
-
-        if (user) {
-            currentUser = user;
-            document.getElementById('user-photo').src = user.photoURL || '';
-            document.getElementById('user-display-name').textContent = user.displayName || user.email;
-            
-            userInfoUi.style.display = 'flex';
-            authActionBtn.textContent = i18n[currentLang].logoutText;
-            authActionBtn.classList.add('logout');
-            
-            unauthMsg.textContent = i18n[currentLang].loadingTxt;
-            unauthMsg.style.display = 'block';
-            authContent.style.display = 'none';
-
-            await pullUserCloudData(user.uid);
-
-            unauthMsg.style.display = 'none';
-            authContent.style.display = 'block';
-            
-            processAutoRoutineChecks();
-            updateUI();
-        } else {
-            currentUser = null;
-            userInfoUi.style.display = 'none';
-            authActionBtn.textContent = i18n[currentLang].loginText;
-            authActionBtn.classList.remove('logout');
-            
-            unauthMsg.textContent = i18n[currentLang].unauthTxt;
-            unauthMsg.style.display = 'block';
-            authContent.style.display = 'none';
-
-            transactions = []; routines = []; routineLogs = []; monthlyBudget = 20000;
-        }
-    });
-
-    async function pullUserCloudData(uid) {
-        try {
-            const userDocRef = doc(db, "users", uid);
-            const snap = await getDoc(userDocRef);
-            if (snap.exists()) {
-                const data = snap.data();
-                transactions = data.transactions || [];
-                routines = data.routines || [];
-                routineLogs = data.routineLogs || [];
-                monthlyBudget = data.monthlyBudget || 20000;
-                budgetInput.value = monthlyBudget;
-            } else {
-                transactions = []; routines = []; routineLogs = []; monthlyBudget = 20000;
-                await pushUserCloudData(uid);
-            }
-        } catch (e) {
-            console.error("Cloud data retrieval failed: ", e);
-        }
-    }
-
-    async function pushUserCloudData(uid) {
-        if (!uid) return;
-        try {
-            await setDoc(doc(db, "users", uid), {
-                transactions, routines, routineLogs, monthlyBudget
-            }, { merge: true });
-        } catch (e) {
-            console.error("Cloud upload failed: ", e);
-        }
-    }
-
-    // 💡 修正：動態監聽與點擊刪除流水帳功能
-    list.addEventListener('click', async (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        if (deleteBtn) {
-            const id = parseFloat(deleteBtn.getAttribute('data-id'));
-            if (!isNaN(id) && currentUser) {
-                transactions = transactions.filter(t => t.id !== id);
-                await pushUserCloudData(currentUser.uid);
-                updateUI(); // 確保立即連動重新渲染圖表與面板
-            }
-        }
-    });
-
-    async function updateBudgetSetting() {
-        const val = parseFloat(budgetInput.value);
-        if (!isNaN(val) && val >= 0 && currentUser) {
-            monthlyBudget = val;
-            await pushUserCloudData(currentUser.uid);
-            updateUI();
-            switchTab('dashboard');
-        }
-    }
-
-    async function addRoutine(e) {
-        e.preventDefault();
-        if (!currentUser) return;
-
-        const rType = document.getElementById('routine-type').value;
-        const rPeriod = document.getElementById('routine-period').value;
-        const rDay = document.getElementById('routine-day').value;
-        const rWeekday = document.getElementById('routine-weekday').value;
-        const rDesc = document.getElementById('routine-desc').value.trim();
-        const rAmount = parseFloat(document.getElementById('routine-amount').value);
-
-        const newRoutine = {
-            id: Date.now(), type: rType, period: rPeriod,
-            day: rDay, weekday: rWeekday, description: rDesc, amount: rAmount
-        };
-
-        routines.push(newRoutine);
-        await pushUserCloudData(currentUser.uid);
-        
-        document.getElementById('routine-desc').value = '';
-        document.getElementById('routine-amount').value = '';
-        
-        renderRoutines();
-        processAutoRoutineChecks();
-        updateUI();
-    }
-
-    // 💡 修正：動態監聽週期排程刪除
-    document.getElementById('routine-list').addEventListener('click', async (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        if (deleteBtn) {
-            const id = parseFloat(deleteBtn.getAttribute('data-id'));
-            if (!isNaN(id) && currentUser) {
-                routines = routines.filter(r => r.id !== id);
-                await pushUserCloudData(currentUser.uid);
-                renderRoutines();
-            }
-        }
-    });
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentUser) return;
-
-        let finalDescription = descriptionInput.value.trim();
-        if (!finalDescription) finalDescription = categorySelect.value;
-
-        let rawTags = tagsInput.value.trim().split(/\s+/).filter(t => t.length > 0);
-        let processedTags = rawTags.map(t => t.startsWith('#') ? t : `#${t}`);
-
-        const entry = {
-            id: Date.now(),
-            date: entryDateInput.value, 
-            type: typeSelect.value,
-            category: categorySelect.value,
-            description: finalDescription,
-            tags: processedTags,
-            amount: parseFloat(amountInput.value)
-        };
-
-        transactions.push(entry);
-        await pushUserCloudData(currentUser.uid);
-        
-        descriptionInput.value = '';
-        tagsInput.value = '';
-        amountInput.value = '';
-        
-        updateUI();
-        switchTab('dashboard');
-    });
-
-    function processAutoRoutineChecks() {
-        if (!currentUser) return;
-        const d = new Date();
-        const currentYear = d.getFullYear();
-        const currentMonth = d.getMonth() + 1;
-        const currentDay = d.getDate(); 
-        const currentDayOfWeek = d.getDay(); 
-
-        let updated = false;
-
-        routines.forEach(r => {
-            let matches = false;
-            let executionKey = ""; 
-
-            if (r.period === 'monthly' && parseInt(r.day) === currentDay) {
-                matches = true;
-                executionKey = `routine-${r.id}-${currentYear}-${currentMonth}-${currentDay}`;
-            } else if (r.period === 'weekly' && parseInt(r.weekday) === currentDayOfWeek) {
-                matches = true;
-                executionKey = `routine-${r.id}-${currentYear}-${currentMonth}-${currentDay}`;
-            }
-
-            if (matches && !routineLogs.includes(executionKey)) {
-                const defaultCat = r.type === 'expense' ? i18n[currentLang].categories.expense[0] : i18n[currentLang].categories.income[0];
-                let finalDesc = r.description || `[Routine] ${defaultCat}`;
-                if (!finalDesc.startsWith('[🔄Auto]')) finalDesc = `[🔄Auto] ${finalDesc}`;
-
-                const autoEntry = {
-                    id: Date.now() + Math.random(),
-                    date: todayStr, type: r.type, category: defaultCat,
-                    description: finalDesc, tags: ['#Auto-Post'], amount: r.amount
-                };
-                transactions.push(autoEntry);
-                routineLogs.push(executionKey);
-                updated = true;
-            }
-        });
-
-        if (updated) pushUserCloudData(currentUser.uid);
-    }
-
-    function renderRoutines() {
-        const rList = document.getElementById('routine-list');
-        const langData = i18n[currentLang];
-        rList.innerHTML = '';
-        routines.forEach(r => {
-            const li = document.createElement('li');
-            li.className = 'routine-item';
-            const periodText = r.period === 'monthly' ? `${langData.periodMonthly} ${r.day}` : `${langData.periodWeekly} ${langData.weekdays[parseInt(r.weekday)]}`;
-            const displayDesc = r.description || `${langData.unnamed} (${r.type === 'expense' ? langData.optExpense : langData.optIncome})`;
-            li.innerHTML = `
-                <div>
-                    <strong>${displayDesc}</strong> <span style="color:var(--text-muted); font-size:0.75rem;">(${periodText})</span>
-                    <br><span style="font-size:0.75rem; color:var(--accent-warm);">${r.type === 'expense' ? langData.optExpense : langData.optIncome} ${formatCurrency(r.amount)}</span>
+            card.innerHTML = `
+                <div class="day-header">
+                    <span class="num-font">${day.label}</span>
+                    <button class="add-btn-icon" onclick="openModal('${day.date}', '${day.label}')">+</button>
                 </div>
-                <button class="delete-btn" style="font-size:0.9rem;" data-id="${r.id}">&times;</button>
+                <div class="day-schedule-list">${itemsHtml}</div>
             `;
-            rList.appendChild(li);
+            container.appendChild(card);
         });
     }
 
-    function updateUI() {
-        list.innerHTML = '';
-        const selectedDate = mainDateView.value;
-        const currentYearMonth = selectedDate.substring(0, 7); 
+    // --- 5. 時間選擇器 (Snap Points) ---
+    function initWheelPickers() {
+        buildWheelItems('wheel-start-hour', 24);
+        buildWheelItems('wheel-start-min', 60);
+        buildWheelItems('wheel-end-hour', 24);
+        buildWheelItems('wheel-end-min', 60);
 
-        const langData = i18n[currentLang];
-        if (currentViewDimension === 'day') {
-            document.getElementById('ui-net').textContent = langData.netDay;
-            document.getElementById('ui-income').textContent = langData.incomeDay;
-            document.getElementById('ui-expense').textContent = langData.expenseDay;
-        } else {
-            document.getElementById('ui-net').textContent = langData.netMonth;
-            document.getElementById('ui-income').textContent = langData.incomeMonth;
-            document.getElementById('ui-expense').textContent = langData.expenseMonth;
+        setWheelValue('wheel-start-hour', 9);
+        setWheelValue('wheel-start-min', 0);
+        setWheelValue('wheel-end-hour', 10);
+        setWheelValue('wheel-end-min', 30);
+    }
+
+    function buildWheelItems(elementId, count) {
+        const container = document.getElementById(elementId);
+        container.querySelectorAll('.wheel-item').forEach(el => el.remove());
+
+        for (let i = 0; i < count; i++) {
+            const item = document.createElement('div');
+            item.className = 'wheel-item';
+            item.innerText = String(i).padStart(2, '0');
+            item.onclick = () => setWheelValue(elementId, i);
+            container.insertBefore(item, container.lastElementChild);
         }
+    }
 
-        let displayIncome = 0;
-        let displayExpense = 0;
-        const chartExpenseSummary = {};
-        i18n[currentLang].categories.expense.forEach(cat => { chartExpenseSummary[cat] = 0; });
+    function onWheelScroll(elementId) {
+        const container = document.getElementById(elementId);
+        const items = container.querySelectorAll('.wheel-item');
+        const scrollTop = container.scrollTop;
+        const selectedIndex = Math.round(scrollTop / 30);
 
-        let totalMonthlyExpenseForBudget = 0;
-
-        transactions.forEach(t => {
-            if (t.type === 'expense' && t.date && t.date.substring(0, 7) === currentYearMonth) {
-                totalMonthlyExpenseForBudget += t.amount;
-            }
-
-            let isMatch = false;
-            if (currentViewDimension === 'day' && t.date === selectedDate) {
-                isMatch = true;
-            } else if (currentViewDimension === 'month' && t.date && t.date.substring(0, 7) === currentYearMonth) {
-                isMatch = true;
-            }
-
-            if (isMatch) {
-                if (t.type === 'income') {
-                    displayIncome += t.amount;
-                } else {
-                    displayExpense += t.amount;
-                    if (chartExpenseSummary[t.category] !== undefined) {
-                        chartExpenseSummary[t.category] += t.amount;
-                    }
-                }
+        items.forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
             }
         });
+    }
 
-        const netBalance = displayIncome - displayExpense;
-        document.getElementById('balance').textContent = (netBalance < 0 ? '-' : '') + formatCurrency(Math.abs(netBalance));
-        document.getElementById('income').textContent = formatCurrency(displayIncome);
-        document.getElementById('expense').textContent = formatCurrency(displayExpense);
+    function setWheelValue(elementId, val) {
+        const container = document.getElementById(elementId);
+        container.scrollTo({ top: val * 30, behavior: 'smooth' });
+        setTimeout(() => onWheelScroll(elementId), 100);
+    }
 
-        handleBudgetLogic(totalMonthlyExpenseForBudget);
-        renderChart(chartExpenseSummary);
+    function getWheelValue(elementId) {
+        const container = document.getElementById(elementId);
+        const selectedIndex = Math.round(container.scrollTop / 30);
+        return String(selectedIndex).padStart(2, '0');
+    }
 
-        // 歷史帳目動態篩選
-        const fDate = filterDate.value;
-        const fCat = filterCategory.value;
-        const fKey = filterKeyword.value.trim().toLowerCase();
-        const fTag = filterTags.value.trim().toLowerCase();
+    function openModal(dateStr, labelStr) {
+        selectedDateForModal = dateStr;
+        document.getElementById('modal-date-label').innerText = `日期：${labelStr}`;
+        document.getElementById('sch-modal').classList.add('open');
 
-        transactions.slice().reverse().forEach(t => {
-            if (fDate && t.date !== fDate) return;
-            if (fCat !== 'all' && t.category !== fCat) return;
-            if (fKey && !t.description.toLowerCase().includes(fKey)) return;
-            if (fTag && !(t.tags || []).some(tag => tag.toLowerCase().includes(fTag))) return;
+        setTimeout(() => {
+            onWheelScroll('wheel-start-hour');
+            onWheelScroll('wheel-start-min');
+            onWheelScroll('wheel-end-hour');
+            onWheelScroll('wheel-end-min');
+        }, 100);
+    }
 
-            const isIncome = t.type === 'income';
+    function closeModal() {
+        document.getElementById('sch-modal').classList.remove('open');
+        document.getElementById('modal-content').value = '';
+    }
+
+    function saveModalSchedule() {
+        const startH = getWheelValue('wheel-start-hour');
+        const startM = getWheelValue('wheel-start-min');
+        const endH = getWheelValue('wheel-end-hour');
+        const endM = getWheelValue('wheel-end-min');
+        
+        const contentVal = document.getElementById('modal-content').value;
+        const tagVal = document.getElementById('modal-tag').value;
+
+        if (!contentVal) return;
+
+        schedules.push({
+            id: Date.now(),
+            date: selectedDateForModal,
+            time: `${startH}:${startM} ~ ${endH}:${endM}`,
+            tag: tagVal,
+            content: contentVal
+        });
+
+        localStorage.setItem('sb_schedules', JSON.stringify(schedules));
+        closeModal();
+        renderWeekBoard();
+    }
+
+    function deleteSchedule(id) {
+        schedules = schedules.filter(s => s.id !== id);
+        localStorage.setItem('sb_schedules', JSON.stringify(schedules));
+        renderWeekBoard();
+    }
+
+    // --- 6. 待辦事項邏輯 ---
+    let todos = JSON.parse(localStorage.getItem('sb_todos')) || [];
+
+    function toggleTodoExtra() {
+        const panel = document.getElementById('todo-extra-panel');
+        const btn = document.getElementById('btn-toggle-extra');
+        panel.classList.toggle('open');
+        btn.classList.toggle('active');
+    }
+
+    document.getElementById('todo-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('todo-input');
+        const startTime = document.getElementById('todo-start-time').value;
+        const endTime = document.getElementById('todo-end-time').value;
+        const memoInput = document.getElementById('todo-memo-input').value.trim();
+
+        if (!input.value.trim()) return;
+
+        let timeRange = '';
+        if (startTime && endTime) {
+            timeRange = `${startTime} - ${endTime}`;
+        } else if (startTime) {
+            timeRange = `${startTime}`;
+        }
+
+        todos.push({ 
+            id: Date.now(), 
+            text: input.value.trim(),
+            time: timeRange,
+            memo: memoInput
+        });
+
+        localStorage.setItem('sb_todos', JSON.stringify(todos));
+        
+        input.value = '';
+        document.getElementById('todo-start-time').value = '';
+        document.getElementById('todo-end-time').value = '';
+        document.getElementById('todo-memo-input').value = '';
+        renderTodos();
+    });
+
+    function renderTodos() {
+        const list = document.getElementById('todo-list');
+        list.innerHTML = '';
+        todos.forEach(t => {
             const li = document.createElement('li');
-            li.className = 'transaction-item';
-            
-            let tagsHtml = (t.tags || []).map(tag => `<span class="tag-badge">${tag}</span>`).join('');
+            li.className = 'todo-item';
+            li.id = `todo-${t.id}`;
+
+            const timeHtml = t.time ? `<div class="todo-time-tag">⏰ ${t.time}</div>` : '';
+            const memoHtml = t.memo ? `<div class="todo-memo">${t.memo}</div>` : '';
 
             li.innerHTML = `
-                <div class="item-details">
-                    <span class="item-desc">
-                        <span class="type-dot ${isIncome ? 'dot-income' : 'dot-expense'}"></span>
-                        ${t.description} ${tagsHtml}
-                    </span>
-                    <span class="item-sub">${t.date} &middot; ${t.category}</span>
-                </div>
-                <div class="right-section">
-                    <span class="item-amount">
-                        ${isIncome ? '+' : '-'}${formatCurrency(t.amount)}
-                    </span>
-                    <button class="delete-btn" data-id="${t.id}">&mdash;</button>
+                <div class="todo-left">
+                    <input type="checkbox" class="todo-checkbox" onchange="completeTodo(${t.id})">
+                    <div class="todo-body">
+                        <span class="todo-text">${t.text}</span>
+                        ${timeHtml}
+                        ${memoHtml}
+                    </div>
                 </div>
             `;
             list.appendChild(li);
         });
     }
 
-    function handleBudgetLogic(totalMonthlyExpense) {
-        const statusEl = document.getElementById('budget-status');
-        const barFillEl = document.getElementById('budget-bar-fill');
-        const alertEl = document.getElementById('budget-alert');
-        const langData = i18n[currentLang];
-
-        statusEl.textContent = `${formatCurrency(totalMonthlyExpense)} / ${formatCurrency(monthlyBudget)}`;
-        let percentage = monthlyBudget > 0 ? (totalMonthlyExpense / monthlyBudget) * 100 : 0;
-        barFillEl.style.width = `${Math.min(percentage, 100)}%`;
-
-        if (monthlyBudget === 0) {
-            barFillEl.style.backgroundColor = 'var(--text-muted)';
-            alertEl.style.display = 'none';
-        } else if (percentage >= 100) {
-            barFillEl.style.backgroundColor = 'var(--accent-warning)';
-            alertEl.textContent = langData.alertExceeded;
-            alertEl.style.color = 'var(--accent-warning)';
-            alertEl.style.display = 'block';
-        } else if (percentage >= 70) {
-            barFillEl.style.backgroundColor = 'var(--accent-warm)';
-            alertEl.textContent = langData.alertWarning;
-            alertEl.style.color = 'var(--accent-warm)';
-            alertEl.style.display = 'block';
-        } else {
-            barFillEl.style.backgroundColor = 'var(--text-muted)';
-            alertEl.style.display = 'none';
+    function completeTodo(id) {
+        const el = document.getElementById(`todo-${id}`);
+        if (el) {
+            el.classList.add('clearing');
+            setTimeout(() => {
+                todos = todos.filter(t => t.id !== id);
+                localStorage.setItem('sb_todos', JSON.stringify(todos));
+                renderTodos();
+            }, 300);
         }
     }
 
-    function renderChart(expenseSummary) {
-        const labels = Object.keys(expenseSummary);
-        const data = Object.values(expenseSummary);
-        const hasExpenses = data.some(val => val > 0);
+    // --- 7. 記帳與數據儀表板 ---
+    let transactions = JSON.parse(localStorage.getItem('sb_transactions')) || [];
+    let monthlyBudget = 20000;
+    let dashboardMode = 'day';
+    let expenseChartInstance = null;
 
-        const chartWrapper = document.getElementById('chart-wrapper');
-        const noDataMsg = document.getElementById('no-data-msg');
+    let defaultCategories = {
+        expense: ['餐飲飲食', '交通出行', '日常購物', '休閒娛樂', '水電雜費', '房租居住', '其他支出'],
+        income: ['薪水收入', '兼職外快', '獎金福利', '紅包收到', '投資收益']
+    };
 
-        if (!hasExpenses) {
-            chartWrapper.style.display = 'none';
-            noDataMsg.style.display = 'block';
-            return;
-        } else {
-            chartWrapper.style.display = 'block';
-            noDataMsg.style.display = 'none';
-        }
+    let categories = JSON.parse(localStorage.getItem('sb_custom_categories')) || defaultCategories;
 
-        const mutedPalette = ['#cca47c', '#a69076', '#8c857b', '#d97706', '#dfcbb5', '#bda88e', '#736b60'];
-
-        if (myChart) {
-            myChart.data.labels = labels;
-            myChart.data.datasets[0].data = data;
-            myChart.update();
-        } else {
-            const ctx = document.getElementById('expenseChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'doughnut', 
-                data: {
-                    labels: labels,
-                    datasets: [{ data: data, backgroundColor: mutedPalette, borderWidth: 1, borderColor: '#ffffff' }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { family: '"Helvetica Neue", Arial, sans-serif', size: 11 }, color: '#24221f', padding: 12, boxWidth: 10 }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    function formatCurrency(num) {
-        return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    }
+    const entryDateInput = document.getElementById('entry-date');
+    const mainDateView = document.getElementById('main-date-view');
+    mainDateView.value = '2026-07-23';
 
     function populateCategories() {
-        const type = typeSelect.value;
-        categorySelect.innerHTML = '';
-        i18n[currentLang].categories[type].forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat; option.textContent = cat;
-            categorySelect.appendChild(option);
+        const type = document.getElementById('type').value;
+        const catSelect = document.getElementById('category');
+        catSelect.innerHTML = '';
+        categories[type].forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.innerText = c;
+            catSelect.appendChild(opt);
+        });
+        renderCategoryManager();
+    }
+
+    function renderCategoryManager() {
+        const type = document.getElementById('type').value;
+        const container = document.getElementById('cat-chip-container');
+        container.innerHTML = '';
+
+        categories[type].forEach(c => {
+            const chip = document.createElement('div');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `<span>${c}</span>`;
+            container.appendChild(chip);
         });
     }
 
-    function populateFilterCategories() {
-        const currentSelection = filterCategory.value;
-        filterCategory.innerHTML = '';
-        
-        const allOpt = document.createElement('option');
-        allOpt.value = 'all'; allOpt.textContent = i18n[currentLang].allCategories;
-        filterCategory.appendChild(allOpt);
+    function addCustomCategory() {
+        const type = document.getElementById('type').value;
+        const input = document.getElementById('new-cat-input');
+        const val = input.value.trim();
 
-        const allCats = [...i18n[currentLang].categories.expense, ...i18n[currentLang].categories.income];
-        allCats.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat; option.textContent = cat;
-            filterCategory.appendChild(option);
-        });
-        filterCategory.value = currentSelection || 'all';
+        if (val && !categories[type].includes(val)) {
+            categories[type].push(val);
+            localStorage.setItem('sb_custom_categories', JSON.stringify(categories));
+            input.value = '';
+            populateCategories();
+            updateFilterCategories();
+        }
     }
 
-    function applyLanguageStrings() {
-        const langData = i18n[currentLang];
-        document.getElementById('ui-title').textContent = langData.title;
-        document.getElementById('ui-subtitle').textContent = langData.subtitle;
+    document.getElementById('bookkeeper-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const catVal = document.getElementById('category').value;
+        const descVal = document.getElementById('description').value.trim();
         
-        document.getElementById('menu-dashboard').innerHTML = currentLang === 'zh' ? '儀表板 / Dashboard' : (currentLang === 'jp' ? 'ダッシュボード' : 'Dashboard');
-        document.getElementById('menu-entry').innerHTML = currentLang === 'zh' ? '記帳與預算 / New Entry' : (currentLang === 'jp' ? '記帳と予算設定' : 'New Entry');
-        document.getElementById('menu-archive').innerHTML = currentLang === 'zh' ? '歷史明細 / Archive' : (currentLang === 'jp' ? '履歴一覧' : 'Archive');
+        const entry = {
+            id: Date.now(),
+            date: entryDateInput.value,
+            type: document.getElementById('type').value,
+            category: catVal,
+            description: descVal !== "" ? descVal : catVal,
+            amount: parseFloat(document.getElementById('amount').value)
+        };
+        transactions.push(entry);
+        localStorage.setItem('sb_transactions', JSON.stringify(transactions));
+        document.getElementById('description').value = '';
+        document.getElementById('amount').value = '';
+        switchTab('dashboard');
+    });
 
-        document.getElementById('ui-title-dashboard').textContent = langData.menuDashboard;
-        document.getElementById('ui-title-entry').textContent = langData.menuEntry;
-        document.getElementById('ui-title-archive').textContent = langData.menuArchive;
-
-        document.getElementById('ui-lbl-viewdate').textContent = langData.viewDate;
-        document.getElementById('btn-view-day').textContent = langData.btnViewDay;
-        document.getElementById('btn-view-month').textContent = langData.btnViewMonth;
+    document.getElementById('routine-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rType = document.getElementById('routine-type').value;
+        const desc = document.getElementById('routine-desc').value;
+        const amt = parseFloat(document.getElementById('routine-amount').value);
         
-        document.getElementById('ui-lbl-entry-date').textContent = langData.lblEntryDate;
-        document.getElementById('ui-lbl-type').textContent = langData.lblType;
-        document.getElementById('ui-lbl-category').textContent = langData.lblCategory;
-        document.getElementById('ui-lbl-desc').textContent = langData.lblDesc;
-        document.getElementById('ui-lbl-tags').textContent = langData.lblTags;
-        document.getElementById('ui-lbl-amount').textContent = langData.lblAmount;
-        document.getElementById('ui-opt-expense').textContent = langData.optExpense;
-        document.getElementById('ui-opt-income').textContent = langData.optIncome;
-        document.getElementById('ui-btn-submit').textContent = langData.btnSubmit;
-        document.getElementById('no-data-msg').textContent = langData.noData;
+        transactions.push({
+            id: Date.now(),
+            date: '2026-07-23',
+            type: rType,
+            category: rType === 'income' ? '薪水收入' : '其他支出',
+            description: `[固定排程] ${desc}`,
+            amount: amt
+        });
+        localStorage.setItem('sb_transactions', JSON.stringify(transactions));
+        document.getElementById('routine-desc').value = '';
+        document.getElementById('routine-amount').value = '';
+        alert("已成功新增固定週期排程項目！");
+        switchTab('dashboard');
+    });
 
-        tagsInput.placeholder = langData.placeholderTags;
-        filterTags.placeholder = langData.placeholderTags;
-        document.getElementById('routine-desc').placeholder = langData.placeholderRDesc;
-        
-        document.getElementById('ui-budget-title').textContent = langData.budgetTitle;
-        document.getElementById('ui-lbl-budget-setting').textContent = langData.lblBudgetSetting;
-        document.getElementById('ui-btn-budget-update').textContent = langData.btnBudgetUpdate;
+    function setDashboardMode(mode) {
+        dashboardMode = mode;
+        const langKey = languages[currentLangIndex];
+        const btnDay = document.getElementById('btn-view-day');
+        const btnMonth = document.getElementById('btn-view-month');
+        const dateLabel = document.getElementById('lbl-date-view-type');
 
-        document.getElementById('ui-lbl-filter-date').textContent = langData.lblFilterDate;
-        document.getElementById('ui-lbl-filter-cat').textContent = langData.lblFilterCat;
-        document.getElementById('ui-lbl-filter-name').textContent = langData.lblFilterName;
-        document.getElementById('ui-lbl-filter-tags').textContent = langData.lblFilterTags;
-        document.getElementById('ui-btn-clear-filter').textContent = langData.btnClearFilter;
-
-        document.getElementById('ui-title-routine').textContent = langData.titleRoutine;
-        document.getElementById('ui-desc-routine').textContent = langData.descRoutine;
-        document.getElementById('ui-lbl-r-type').textContent = langData.lblRType;
-        document.getElementById('ui-lbl-r-period').textContent = langData.lblRPeriod;
-        document.getElementById('ui-lbl-r-day').textContent = langData.lblRDay;
-        document.getElementById('ui-lbl-r-weekday').textContent = langData.lblRWeekday;
-        document.getElementById('ui-lbl-r-desc').textContent = langData.lblRDesc;
-        document.getElementById('ui-lbl-r-amount').textContent = langData.lblRAmount;
-        document.getElementById('ui-btn-r-submit').textContent = langData.btnRSubmit;
-        
-        document.getElementById('ui-opt-r-expense').textContent = langData.optExpense;
-        document.getElementById('ui-opt-r-income').textContent = langData.optIncome;
-        document.getElementById('ui-opt-r-monthly').textContent = currentLang === 'zh' ? '每月固定日期 (Monthly)' : (currentLang === 'jp' ? '毎月の固定日' : 'Monthly');
-        document.getElementById('ui-opt-r-weekly').textContent = currentLang === 'zh' ? '每週固定星期幾 (Weekly)' : (currentLang === 'jp' ? '毎週の固定曜日' : 'Weekly');
-
-        const authActionBtn = document.getElementById('auth-action-btn');
-        if (currentUser) {
-            authActionBtn.textContent = langData.logoutText;
+        if (mode === 'day') {
+            mainDateView.type = 'date';
+            mainDateView.value = '2026-07-23';
+            dateLabel.innerText = i18nData[langKey].lblViewDateDay;
+            btnDay.style.background = 'var(--text-main)'; btnDay.style.color = 'var(--bg-main)';
+            btnMonth.style.background = 'var(--bg-window)'; btnMonth.style.color = 'var(--text-main)';
         } else {
-            authActionBtn.textContent = langData.loginText;
-            document.getElementById('unauthenticated-msg').textContent = langData.unauthTxt;
+            mainDateView.type = 'month';
+            mainDateView.value = '2026-07';
+            dateLabel.innerText = i18nData[langKey].lblViewDateMonth;
+            btnMonth.style.background = 'var(--text-main)'; btnMonth.style.color = 'var(--bg-main)';
+            btnDay.style.background = 'var(--bg-window)'; btnDay.style.color = 'var(--text-main)';
         }
-
-        for (let i = 0; i <= 6; i++) {
-            const el = document.getElementById(`ui-opt-w-${i}`);
-            if (el) el.textContent = currentLang === 'zh' ? `星期${langData.weekdays[i]}` : langData.weekdays[i];
-        }
-
-        populateCategories();
-        populateFilterCategories();
-        renderRoutines();
-        updateUI();
+        updateDashboard();
     }
 
-    // 事件監聽宣告
-    document.getElementById('menu-dashboard').addEventListener('click', () => switchTab('dashboard'));
-    document.getElementById('menu-entry').addEventListener('click', () => switchTab('entry'));
-    document.getElementById('menu-archive').addEventListener('click', () => switchTab('archive'));
-    document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
-    document.getElementById('auth-action-btn').addEventListener('click', handleAuthAction);
-    document.getElementById('btn-view-day').addEventListener('click', () => setViewDimension('day'));
-    document.getElementById('btn-view-month').addEventListener('click', () => setViewDimension('month'));
-    document.getElementById('ui-btn-clear-filter').addEventListener('click', clearFilters);
-    document.getElementById('routine-period').addEventListener('change', toggleRoutinePeriodInputs);
-    document.getElementById('ui-btn-budget-update').addEventListener('click', updateBudgetSetting);
-    document.getElementById('routine-form').addEventListener('submit', addRoutine);
-    typeSelect.addEventListener('change', populateCategories);
+    function updateDashboard() {
+        const selectedVal = mainDateView.value;
 
-    // 篩選與日期即時更新
-    mainDateView.addEventListener('change', updateUI);
-    filterDate.addEventListener('change', updateUI);
-    filterCategory.addEventListener('change', updateUI);
-    filterKeyword.addEventListener('input', updateUI);
-    filterTags.addEventListener('input', updateUI);
+        let filtered = transactions.filter(t => {
+            if (dashboardMode === 'day') return t.date === selectedVal;
+            return t.date.startsWith(selectedVal);
+        });
 
-    applyLanguageStrings();
+        let income = 0, expense = 0;
+        let catTotals = {};
+
+        filtered.forEach(t => {
+            if (t.type === 'income') {
+                income += t.amount;
+            } else {
+                expense += t.amount;
+                catTotals[t.category] = (catTotals[t.category] || 0) + t.amount;
+            }
+        });
+
+        document.getElementById('balance').innerText = `$${formatAmount(income - expense)}`;
+        document.getElementById('income').innerText = `$${formatAmount(income)}`;
+        document.getElementById('expense').innerText = `$${formatAmount(expense)}`;
+
+        document.getElementById('budget-status').innerText = `$${formatAmount(expense)} / $${formatAmount(monthlyBudget)}`;
+        const pct = Math.min((expense / monthlyBudget) * 100, 100);
+        document.getElementById('budget-bar-fill').style.width = `${pct}%`;
+        document.getElementById('budget-alert').style.display = expense > monthlyBudget ? 'block' : 'none';
+
+        renderChart(catTotals);
+    }
+
+    function renderChart(catTotals) {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        const labels = Object.keys(catTotals);
+        const data = Object.values(catTotals);
+
+        if (expenseChartInstance) expenseChartInstance.destroy();
+
+        if (labels.length === 0) {
+            document.getElementById('no-data-msg').style.display = 'block';
+            return;
+        }
+        document.getElementById('no-data-msg').style.display = 'none';
+
+        expenseChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#d97706', '#b91c1c', '#2563eb', '#059669', '#7c3aed', '#db2777', '#8c857b']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function renderArchiveList() {
+        const fDate = document.getElementById('filter-date').value;
+        const fCat = document.getElementById('filter-category').value;
+        const fKw = document.getElementById('filter-keyword').value.toLowerCase();
+
+        const list = document.getElementById('transaction-list');
+        list.innerHTML = '';
+
+        let filtered = transactions.filter(t => {
+            if (fDate && t.date !== fDate) return false;
+            if (fCat !== 'ALL' && t.category !== fCat) return false;
+            if (fKw && !t.description.toLowerCase().includes(fKw)) return false;
+            return true;
+        });
+
+        filtered.forEach(t => {
+            const li = document.createElement('li');
+            li.className = 'transaction-item';
+            li.innerHTML = `
+                <div>
+                    <strong>${t.description}</strong><br>
+                    <small style="color:var(--text-muted);" class="num-font">${t.date} &middot; ${t.category}</small>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-weight:600;">${t.type === 'income' ? '+' : '-'}$${formatAmount(t.amount)}</span>
+                    <button onclick="deleteTransaction(${t.id})" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">✕</button>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+    }
+
+    function deleteTransaction(id) {
+        transactions = transactions.filter(t => t.id !== id);
+        localStorage.setItem('sb_transactions', JSON.stringify(transactions));
+        renderArchiveList();
+    }
+
+    function updateFilterCategories() {
+        const archiveCatSelect = document.getElementById('filter-category');
+        archiveCatSelect.innerHTML = '<option value="ALL">全部分類</option>';
+        const allCats = [...new Set([...categories.expense, ...categories.income])];
+        allCats.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.innerText = c;
+            archiveCatSelect.appendChild(opt);
+        });
+    }
+
+    // --- 8. 番茄鐘 ---
+    let timer = null, secondsLeft = 1500, isRunning = false;
+    function toggleTimer() {
+        const btn = document.getElementById('pomo-start-btn');
+        const langKey = languages[currentLangIndex];
+        if (isRunning) {
+            clearInterval(timer);
+            isRunning = false;
+            btn.innerText = i18nData[langKey].btnStartFocus;
+        } else {
+            isRunning = true;
+            btn.innerText = i18nData[langKey].btnPauseFocus;
+            timer = setInterval(() => {
+                secondsLeft--;
+                const mins = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+                const secs = String(secondsLeft % 60).padStart(2, '0');
+                document.getElementById('pomo-display').innerText = `${mins}:${secs}`;
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    alert("Focus session complete!");
+                }
+            }, 1000);
+        }
+    }
+
+    // --- 初始化 ---
+    checkSavedUser();
+    populateCategories();
+    updateFilterCategories();
+    renderTagManager();
+    initWheelPickers();
+    renderWeekBoard();
+    renderTodos();
+    updateDashboard();
 </script>
-
 </body>
 </html>
